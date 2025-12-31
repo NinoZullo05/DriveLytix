@@ -1,0 +1,16 @@
+{
+  "common": {
+    "loading": "LADEN...",
+    "appName": "DriveLytix"
+  },
+  "loadingScreen": {
+    "subtitle": "OBD-II DIAGNOSE",
+    "taglinePart1": "Dein Auto, Deine Daten,\n",
+    "taglinePart2": "Deine Fahrt.",
+    "connecting": "VERBINDUNG ZUR ECU..."
+  },
+  "home": {
+    "welcome": "Willkommen bei DriveLytix!",
+    "loaded": "App erfolgreich geladen"
+  }
+}

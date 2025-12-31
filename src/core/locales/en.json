@@ -1,0 +1,55 @@
+{
+  "common": {
+    "loading": "LOADING...",
+    "appName": "DriveLytix"
+  },
+  "loadingScreen": {
+    "subtitle": "OBD-II DIAGNOSTICS",
+    "taglinePart1": "Your Car, Your Data,\n",
+    "taglinePart2": "Your Drive.",
+    "connecting": "CONNECTING TO ECU..."
+  },
+  "home": {
+    "welcome": "Welcome to DriveLytix!",
+    "loaded": "App Loaded Successfully"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Changes are saved automatically",
+    "sections": {
+      "vehicle": "VEHICLE PROFILE",
+      "connection": "CONNECTION",
+      "data": "DATA & PRIVACY",
+      "preferences": "PREFERENZE"
+    },
+    "vehicle": {
+      "make": "Make",
+      "model": "Model",
+      "year": "Year",
+      "engine": "Engine"
+    },
+    "connection": {
+      "adapterType": "Adapter Type",
+      "autoConnect": "Auto-Connect",
+      "autoConnectDesc": "On startup"
+    },
+    "data": {
+      "logTrip": "Log Trip Data",
+      "logTripDesc": "Save history locally",
+      "analytics": "Analytics",
+      "analyticsDesc": "Share anonymous usage"
+    },
+    "preferences": {
+      "speedUnits": "Speed Units",
+      "temperature": "Temperature",
+      "keepScreenOn": "Keep Screen On",
+      "keepScreenOnDesc": "Prevent sleep while driving",
+      "highContrast": "High Contrast",
+      "highContrastDesc": "Increase visibility"
+    },
+    "footer": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
+  }
+}
