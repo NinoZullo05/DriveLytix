@@ -9,9 +9,39 @@
     "taglinePart2": "La tua guida.",
     "connecting": "CONNESSIONE ALLA ECU..."
   },
+  "connection": {
+    "title": "Connessione",
+    "help": "Aiuto",
+    "readyToScan": "Pronto a scansionare",
+    "scanForDevices": "Cerca dispositivi",
+    "scanning": "Scansione...",
+    "stopScan": "Ferma Scansione",
+    "lastConnected": "ULTIMO CONNESSO",
+    "availableDevices": "DISPOSITIVI DISPONIBILI",
+    "noDevices": "Nessun dispositivo trovato. Premi Cerca per iniziare.",
+    "connectAdapter": "Connetti Adattatore",
+    "connectInstructions": "Assicurati che l'accensione sia ON e l'adattatore OBD-II sia ben inserito.",
+    "troubleConnecting": "Problemi di connessione?",
+    "new": "NUOVO",
+    "skip": "Salta",
+    "connectedAlert": "Connesso",
+    "connectedMessage": "Connesso con successo a {{name}}"
+  },
   "home": {
     "welcome": "Benvenuto in DriveLytix!",
-    "loaded": "App Caricata con Successo"
+    "loaded": "App Caricata con Successo",
+    "vehicleStatus": "Stato Veicolo",
+    "avgSpeed": "Vel. Media",
+    "fuelLevel": "Livello Carburante",
+    "coolant": "Refrigerante",
+    "engineLoad": "Carico Motore",
+    "ecoDriving": "Guida Eco",
+    "battery": "Batteria",
+    "intake": "Aspirazione",
+    "quickActions": "AZIONI RAPIDE",
+    "logs": "Registri",
+    "charts": "Grafici",
+    "tools": "Strumenti"
   },
   "settings": {
     "title": "Impostazioni",

@@ -8,13 +8,14 @@ import { moderateScale, verticalScale } from "../src/core/responsive";
 import { theme } from "../src/core/theme";
 
 import BottomNavigationbar from "../src/presentation/components/BottomNavigationbar";
+import ConnectionScreen from "../src/presentation/screens/ConnectionScreen";
 import DataStorageScreen from "../src/presentation/screens/DataStorageScreen";
 import GetStartedScreen from "../src/presentation/screens/GetStartedScreen";
 import LoadingScreen from "../src/presentation/screens/LoadingScreen";
 
 /* ---------------- TYPES ---------------- */
 
-type AppStage = "loading" | "getStarted" | "dataSetup" | "home";
+type AppStage = "loading" | "getStarted" | "dataSetup" | "connection" | "home";
 
 /* ---------------- APP ---------------- */
 
@@ -33,6 +34,9 @@ export default function App() {
     try {
       const hasLaunched = await AsyncStorage.getItem("HAS_LAUNCHED");
       const storageChoice = await AsyncStorage.getItem("STORAGE_CHOICE");
+      const lastDeviceId = await AsyncStorage.getItem(
+        "LAST_CONNECTED_DEVICE_ID"
+      );
 
       setStage("loading");
 
@@ -41,6 +45,12 @@ export default function App() {
           setStage("getStarted");
         } else if (!storageChoice) {
           setStage("dataSetup");
+        } else if (!lastDeviceId) {
+          // User Requirement: Choice of device should appear when app opens if not set
+          // We can't use router.push here easily because we are unconditionally rendering based on stage.
+          // We will introduce a new stage "connection" or handle it after home mount.
+          // But simpler: just set stage to 'connection' which renders the screen.
+          setStage("connection");
         } else {
           setStage("home");
         }
@@ -62,8 +72,15 @@ export default function App() {
     try {
       await AsyncStorage.setItem("STORAGE_CHOICE", type);
       setStage("loading");
-      setTimeout(() => {
-        setStage("home");
+      setTimeout(async () => {
+        const lastDeviceId = await AsyncStorage.getItem(
+          "LAST_CONNECTED_DEVICE_ID"
+        );
+        if (!lastDeviceId) {
+          setStage("connection");
+        } else {
+          setStage("home");
+        }
       }, 1500);
     } catch (error) {
       console.error("Storage selection error:", error);
@@ -83,6 +100,15 @@ export default function App() {
 
   if (stage === "dataSetup") {
     return <DataStorageScreen onSelectStorage={handleStorageSelection} />;
+  }
+
+  if (stage === "connection") {
+    return (
+      <ConnectionScreen
+        onBack={() => setStage("dataSetup")}
+        onSkip={() => setStage("home")}
+      />
+    );
   }
 
   // HOME → Bottom Tabs

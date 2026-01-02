@@ -9,9 +9,39 @@
     "taglinePart2": "Your Drive.",
     "connecting": "CONNECTING TO ECU..."
   },
+  "connection": {
+    "title": "Connection",
+    "help": "Help",
+    "readyToScan": "Ready to Scan",
+    "scanForDevices": "Scan for Devices",
+    "scanning": "Scanning...",
+    "stopScan": "Stop Scan",
+    "lastConnected": "LAST CONNECTED",
+    "availableDevices": "AVAILABLE DEVICES",
+    "noDevices": "No devices found. Press Scan to start.",
+    "connectAdapter": "Connect Adapter",
+    "connectInstructions": "Ensure your ignition is ON and the OBD-II adapter is firmly plugged into the port.",
+    "troubleConnecting": "Having trouble connecting?",
+    "new": "NEW",
+    "skip": "Skip",
+    "connectedAlert": "Connected",
+    "connectedMessage": "Successfully connected to {{name}}"
+  },
   "home": {
     "welcome": "Welcome to DriveLytix!",
-    "loaded": "App Loaded Successfully"
+    "loaded": "App Loaded Successfully",
+    "vehicleStatus": "Vehicle Status",
+    "avgSpeed": "Avg Speed",
+    "fuelLevel": "Fuel Level",
+    "coolant": "Coolant",
+    "engineLoad": "Engine Load",
+    "ecoDriving": "Eco Driving",
+    "battery": "Battery",
+    "intake": "Intake",
+    "quickActions": "QUICK ACTIONS",
+    "logs": "Logs",
+    "charts": "Charts",
+    "tools": "Tools"
   },
   "settings": {
     "title": "Settings",

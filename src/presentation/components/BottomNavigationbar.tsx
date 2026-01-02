@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
-import { Platform, TouchableOpacity, useColorScheme } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  useColorScheme,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../core/theme";
 
@@ -14,27 +20,21 @@ import SettingsScreen from "../screens/SettingsScreen";
 const Tab = createBottomTabNavigator();
 
 const CustomPowerButton = ({ children, onPress, currentTheme }: any) => (
-  <TouchableOpacity
-    style={{
-      top: -30,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: theme.palette.primary,
-      width: 70,
-      height: 70,
-      borderRadius: 35,
-      shadowColor: theme.palette.primary,
-      shadowOpacity: 0.5,
-      shadowOffset: { width: 0, height: 4 },
-      shadowRadius: 10,
-      elevation: 8,
-      borderWidth: 6,
-      borderColor: currentTheme.background, // Match container background
-    }}
-    onPress={onPress}
-  >
-    {children}
-  </TouchableOpacity>
+  <View style={styles.powerButtonContainer}>
+    <TouchableOpacity
+      style={[
+        styles.powerButton,
+        {
+          backgroundColor: "#00C2FF",
+          shadowColor: "#00C2FF",
+        },
+      ]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <Ionicons name="power" size={32} color="#fff" />
+    </TouchableOpacity>
+  </View>
 );
 
 const BottomNavigationbar = () => {
@@ -48,43 +48,40 @@ const BottomNavigationbar = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: currentTheme.surface,
-          borderTopColor: currentTheme.border,
+          backgroundColor: "#0B0F17",
+          borderTopColor: "rgba(255,255,255,0.05)",
           borderTopWidth: 1,
-          height: Platform.OS === "ios" ? 88 : 64 + insets.bottom,
+          height: Platform.OS === "ios" ? 88 : 70 + insets.bottom,
           paddingBottom: Platform.OS === "ios" ? 28 : insets.bottom + 8,
-          paddingTop: 8,
+          paddingTop: 12,
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
           elevation: 0,
         },
-        tabBarActiveTintColor: currentTheme.text,
-        tabBarInactiveTintColor: currentTheme.textTertiary,
+        tabBarActiveTintColor: "#00C2FF",
+        tabBarInactiveTintColor: "rgba(255,255,255,0.4)",
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "500",
-          marginTop: 2,
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: 4,
         },
         tabBarIcon: ({ color, size, focused }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "home";
 
           switch (route.name) {
             case "Dashboard":
-              iconName = focused ? "speedometer" : "speedometer-outline";
+              iconName = focused ? "grid" : "grid-outline";
               break;
             case "Data":
-              iconName = focused ? "stats-chart" : "stats-chart-outline";
+              iconName = focused ? "bar-chart" : "bar-chart-outline";
               break;
             case "Map":
               iconName = focused ? "map" : "map-outline";
               break;
             case "Settings":
-              iconName = focused ? "settings" : "settings-outline";
-              break;
-            case "Power":
-              iconName = "power";
+              iconName = focused ? "person" : "person-outline";
               break;
           }
 
@@ -109,9 +106,7 @@ const BottomNavigationbar = () => {
           tabBarLabel: "",
           tabBarIcon: () => null,
           tabBarButton: (props) => (
-            <CustomPowerButton {...props} currentTheme={currentTheme}>
-              <Ionicons name="power" size={32} color="#fff" />
-            </CustomPowerButton>
+            <CustomPowerButton {...props} currentTheme={currentTheme} />
           ),
         }}
       />
@@ -122,11 +117,32 @@ const BottomNavigationbar = () => {
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarLabel: "Settings",
+          tabBarLabel: "Profile",
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  powerButtonContainer: {
+    top: -25,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  powerButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowOpacity: 0.6,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 15,
+    elevation: 10,
+    borderWidth: 4,
+    borderColor: "#0B0F17",
+  },
+});
 
 export default BottomNavigationbar;

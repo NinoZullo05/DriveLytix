@@ -37,19 +37,28 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": [
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Allow DriveLytix to connect to your OBD-II adapter."
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
-        "androidStatusBar": {
+    "androidStatusBar": {
       "translucent": false
     },
     "androidNavigationBar": {
       "visible": false,
       "behavior": "overlay-swipe"
     }
-
   }
 }
