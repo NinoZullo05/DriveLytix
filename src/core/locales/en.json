@@ -25,7 +25,8 @@
     "new": "NEW",
     "skip": "Skip",
     "connectedAlert": "Connected",
-    "connectedMessage": "Successfully connected to {{name}}"
+    "connectedMessage": "Successfully connected to {{name}}",
+    "disconnected": "Disconnected"
   },
   "home": {
     "welcome": "Welcome to DriveLytix!",
@@ -80,6 +81,29 @@
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service"
+    }
+  },
+  "widgets": {
+    "manageTitle": "Manage Widgets",
+    "customizeTitle": "Customize Dashboard",
+    "customizeSubtitle": "Enable, disable, and reorder widgets to personalize your real-time driving view.",
+    "reset": "Reset to Defaults",
+    "done": "Done",
+    "rpm": "Engine RPM",
+    "speed": "Vehicle Speed",
+    "boost": "Boost Pressure",
+    "coolant": "Coolant Temp",
+    "fuel": "Fuel Level",
+    "oil": "Oil Temperature",
+    "rpmDesc": "Live tachometer",
+    "speedDesc": "GPS & OBD speed",
+    "boostDesc": "Turbo/Supercharger",
+    "coolantDesc": "Engine temperature",
+    "fuelDesc": "Tank percentage",
+    "oilDesc": "Engine oil heat",
+    "categories": {
+      "engine": "ENGINE & PERFORMANCE",
+      "fluids": "FLUIDS & TEMPS"
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { bluetoothService } from "../../core/services/BluetoothService";
 import { theme } from "../../core/theme";
 
 import DashboardScreen from "../screens/DashboardScreen";
@@ -19,23 +20,38 @@ import SettingsScreen from "../screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
-const CustomPowerButton = ({ children, onPress, currentTheme }: any) => (
-  <View style={styles.powerButtonContainer}>
-    <TouchableOpacity
-      style={[
-        styles.powerButton,
-        {
-          backgroundColor: "#00C2FF",
-          shadowColor: "#00C2FF",
-        },
-      ]}
-      onPress={onPress}
-      activeOpacity={0.8}
-    >
-      <Ionicons name="power" size={32} color="#fff" />
-    </TouchableOpacity>
-  </View>
-);
+const CustomPowerButton = ({ onPress }: any) => {
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = bluetoothService.subscribeToConnectionStatus(
+      (status) => {
+        setIsConnected(status);
+      }
+    );
+    return unsubscribe;
+  }, []);
+
+  const buttonColor = isConnected ? "#4ADE80" : "#F87171"; // Green if connected, Red if not
+
+  return (
+    <View style={styles.powerButtonContainer}>
+      <TouchableOpacity
+        style={[
+          styles.powerButton,
+          {
+            backgroundColor: buttonColor,
+            shadowColor: buttonColor,
+          },
+        ]}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="power" size={32} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const BottomNavigationbar = () => {
   const colorScheme = useColorScheme();

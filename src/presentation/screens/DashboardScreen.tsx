@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle } from "react-native-svg";
 import { moderateScale, verticalScale } from "../../core/responsive";
+import { bluetoothService } from "../../core/services/BluetoothService";
 import { theme } from "../../core/theme";
 
 const { width } = Dimensions.get("window");
@@ -153,6 +154,17 @@ const DashboardScreen = () => {
   const insets = useSafeAreaInsets();
   const activeColor = theme.palette.primary;
 
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = bluetoothService.subscribeToConnectionStatus(
+      (status) => {
+        setIsConnected(status);
+      }
+    );
+    return unsubscribe;
+  }, []);
+
   const navigateToConnection = () => {
     router.push("/connection");
   };
@@ -178,15 +190,22 @@ const DashboardScreen = () => {
             <Text style={styles.appName}>DriveLytix</Text>
             <View style={styles.connectedRow}>
               <View
-                style={[styles.statusDot, { backgroundColor: "#4ADE80" }]}
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: isConnected ? "#4ADE80" : "#F87171" },
+                ]}
               />
-              <Text style={styles.statusText}>CONNECTED</Text>
+              <Text style={styles.statusText}>
+                {isConnected
+                  ? t("connection.connectedAlert").toUpperCase()
+                  : t("connection.disconnected").toUpperCase()}
+              </Text>
             </View>
           </View>
         </View>
         <TouchableOpacity
           style={styles.settingsButton}
-          onPress={() => console.log("Settings button pressed")}
+          onPress={() => router.push("/manage-widgets")}
         >
           <MaterialIcons name="settings" size={24} color="#fff" />
         </TouchableOpacity>

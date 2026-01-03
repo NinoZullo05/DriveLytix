@@ -25,7 +25,8 @@
     "new": "NUOVO",
     "skip": "Salta",
     "connectedAlert": "Connesso",
-    "connectedMessage": "Connesso con successo a {{name}}"
+    "connectedMessage": "Connesso con successo a {{name}}",
+    "disconnected": "Disconnesso"
   },
   "home": {
     "welcome": "Benvenuto in DriveLytix!",
@@ -80,6 +81,29 @@
     "footer": {
       "privacy": "Privacy Policy",
       "terms": "Termini di Servizio"
+    }
+  },
+  "widgets": {
+    "manageTitle": "Gestisci Widget",
+    "customizeTitle": "Personalizza Dashboard",
+    "customizeSubtitle": "Abilita, disabilita e riordina i widget per personalizzare la tua visualizzazione in tempo reale.",
+    "reset": "Ripristina Predefiniti",
+    "done": "Fatto",
+    "rpm": "RPM Motore",
+    "speed": "Velocità Veicolo",
+    "boost": "Pressione Turbo",
+    "coolant": "Temp. Refrigerante",
+    "fuel": "Livello Carburante",
+    "oil": "Temperatura Olio",
+    "rpmDesc": "Tachimetro live",
+    "speedDesc": "Velocità GPS & OBD",
+    "boostDesc": "Turbo/Sovralimentazione",
+    "coolantDesc": "Temperatura motore",
+    "fuelDesc": "Percentuale serbatoio",
+    "oilDesc": "Calore olio motore",
+    "categories": {
+      "engine": "MOTORE E PRESTAZIONI",
+      "fluids": "FLUIDI E TEMPERATURE"
     }
   }
 }

@@ -16,24 +16,54 @@ export interface BluetoothDevice {
 class BluetoothService {
     private manager: BleManager;
     private isScanning = false;
+    private simulationMode = false;
     private lastConnectedDeviceIdKey = 'LAST_CONNECTED_DEVICE_ID';
+    private connectedDeviceId: string | null = null;
+    private listeners: ((status: boolean) => void)[] = [];
 
     constructor() {
         this.manager = new BleManager();
     }
 
+    setSimulationMode(enabled: boolean) {
+        this.simulationMode = enabled;
+        console.log(`[BluetoothService] Simulation mode: ${enabled}`);
+    }
+
+    getSimulationMode() {
+        return this.simulationMode;
+    }
+
+    // New: Subscribe to connection changes
+    subscribeToConnectionStatus(callback: (isConnected: boolean) => void) {
+        this.listeners.push(callback);
+        // Immediate call with current state
+        callback(this.connectedDeviceId !== null);
+        return () => {
+            this.listeners = this.listeners.filter(l => l !== callback);
+        };
+    }
+
+    private notifyListeners() {
+        const status = this.connectedDeviceId !== null;
+        this.listeners.forEach(callback => callback(status));
+    }
+
+    getConnectedDeviceId() {
+        return this.connectedDeviceId;
+    }
+
     async initialize() {
-        // Any init logic
-         const state = await this.manager.state();
-         console.log("Bluetooth State:", state);
-         if (state === 'PoweredOff') {
-            // Optional: Prompt user to turn on BT
-         }
+        try {
+            const state = await this.manager.state();
+            console.log("Bluetooth State:", state);
+        } catch (e) {
+            console.error("Failed to check Bluetooth state", e);
+        }
     }
 
     async requestPermissions(): Promise<boolean> {
         if (Platform.OS === 'android') {
-            // Android 12+ (API 31+)
             if (Platform.Version >= 31) {
                 const granted = await PermissionsAndroid.requestMultiple([
                     PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
@@ -47,7 +77,6 @@ class BluetoothService {
                     granted['android.permission.ACCESS_FINE_LOCATION'] === PermissionsAndroid.RESULTS.GRANTED
                 );
             } else {
-                // Android < 12
                 const granted = await PermissionsAndroid.request(
                     PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
                     {
@@ -61,7 +90,7 @@ class BluetoothService {
                 return granted === PermissionsAndroid.RESULTS.GRANTED;
             }
         }
-        return true; // iOS handles automatically via Info.plist usage descriptions
+        return true;
     }
 
     startScan(callback: (devices: BluetoothDevice[]) => void, errorCallback?: (error: BleError) => void) {
@@ -70,20 +99,23 @@ class BluetoothService {
         this.isScanning = true;
         let foundDevices: Map<string, BluetoothDevice> = new Map();
 
-        // Add mock devices for testing
-        const mockDevices: BluetoothDevice[] = [
-            { id: 'MOCK-OBDII-001', name: 'OBDII-ELM327-VLink', rssi: -45, status: 'new' },
-            { id: 'MOCK-DASH-042', name: 'DriveLytix Adapter Pro', rssi: -32, status: 'new' },
-            { id: 'MOCK-VEEPEAK-99', name: 'Veepeak OBDCheck', rssi: -58, status: 'new' },
-            { id: 'MOCK-UNKNOWN-XX', name: 'Unknown Device', rssi: -82, status: 'new' },
-        ];
+        // Conditional mock devices
+        if (this.simulationMode) {
+            const mockDevices: BluetoothDevice[] = [
+                { id: 'SIM-OBDII-001', name: 'SIMULATED-ELM327', rssi: -45, status: 'new' },
+                { id: 'SIM-PRO-002', name: 'DriveLytix Pro Adapter (Sim)', rssi: -32, status: 'new' },
+            ];
+            mockDevices.forEach(d => foundDevices.set(d.id, d));
+            callback(Array.from(foundDevices.values()));
+        }
 
-        // Immediately show mock devices
-        mockDevices.forEach(d => foundDevices.set(d.id, d));
-        callback(Array.from(foundDevices.values()));
-
-        this.manager.startDeviceScan(null, { allowDuplicates: true }, (error, device) => {
+        // Start real scan
+        this.manager.startDeviceScan(null, { allowDuplicates: false }, (error, device) => {
             if (error) {
+                if (this.simulationMode) {
+                    console.log("Real scan failed, but continuing in simulation mode.");
+                    return;
+                }
                 console.error("Scan Error:", error);
                 this.isScanning = false;
                 if (errorCallback) errorCallback(error);
@@ -92,7 +124,6 @@ class BluetoothService {
 
             if (device) {
                  const name = device.name || device.localName || 'Unknown Device';
-                 
                  foundDevices.set(device.id, {
                      id: device.id,
                      name: name,
@@ -104,6 +135,12 @@ class BluetoothService {
                  callback(Array.from(foundDevices.values()));
             }
         });
+
+        setTimeout(() => {
+            if (this.isScanning) {
+                this.stopScan();
+            }
+        }, 10000);
     }
 
     stopScan() {
@@ -112,40 +149,65 @@ class BluetoothService {
     }
 
     async connectToDevice(deviceId: string): Promise<boolean> {
-        this.stopScan(); // Stop scanning before connecting
+        this.stopScan();
         
+        if (deviceId.startsWith('SIM-')) {
+            console.log(`[Simulation] Connecting to mock device ${deviceId}...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            this.connectedDeviceId = deviceId;
+            this.notifyListeners();
+            return true;
+        }
+
         try {
-            console.log(`Connecting to ${deviceId}...`);
             const device = await this.manager.connectToDevice(deviceId, { autoConnect: false });
-            console.log(`Connected to ${device.name}, discovering services...`);
-            
             await device.discoverAllServicesAndCharacteristics();
-            
-            // Save as last connected
             await AsyncStorage.setItem(this.lastConnectedDeviceIdKey, deviceId);
             
+            this.connectedDeviceId = deviceId;
+            this.notifyListeners();
+            
+            // Listen for disconnection
+            device.onDisconnected((error, disconnectedDevice) => {
+                console.log(`Device ${disconnectedDevice.id} disconnected`);
+                this.connectedDeviceId = null;
+                this.notifyListeners();
+            });
+
             return true;
         } catch (error) {
             console.error("Connection Error:", error);
+            this.connectedDeviceId = null;
+            this.notifyListeners();
             return false;
         }
     }
     
     async checkAutoConnect(): Promise<string | null> {
          const lastId = await AsyncStorage.getItem(this.lastConnectedDeviceIdKey);
+         // If we auto-connect, we'd ideally set connectedDeviceId here, 
+         // but that usually happens inside a connection attempt.
          return lastId;
     }
 
     async disconnect(deviceId: string) {
+        if (deviceId.startsWith('SIM-')) {
+            this.connectedDeviceId = null;
+            this.notifyListeners();
+            return;
+        }
+
         try {
             await this.manager.cancelDeviceConnection(deviceId);
+            this.connectedDeviceId = null;
+            this.notifyListeners();
         } catch (error) {
              console.error("Disconnect error", error);
         }
     }
     
-    // Helper to see if a device is connected
     async isDeviceConnected(deviceId: string): Promise<boolean> {
+        if (deviceId.startsWith('SIM-')) return this.connectedDeviceId === deviceId;
         return this.manager.isDeviceConnected(deviceId);
     }
 }

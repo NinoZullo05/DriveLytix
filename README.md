@@ -1,95 +1,81 @@
 # DriveLytix 🚗📊
 
-**DriveLytix** is a modern React Native application built with **Expo**, designed to provide distinctive driving analytics and data visualization. The application leverages a robust **Clean Architecture** to ensure detailed scalability, maintainability, and testability.
+**DriveLytix** is a premium OBD-II diagnostic and real-time vehicle analytics application built with **React Native** and **Expo**. It empowers drivers to unlock hidden data from their vehicles, providing professional-grade telemetry, error code diagnostics, and a customizable interactive dashboard.
+
+---
 
 ## 🌟 Key Features
 
-- **Clean Architecture**: Structured separation of concerns using Domain, Data, Presentation, and Core layers.
-- **Internationalization (i18n)**: Full multi-language support including English, Italian, French, German, Spanish, and Portuguese.
-- **Dynamic Theming**: Seamless Light and Dark mode support with a custom design system.
-- **Advanced Navigation**: Custom tab bar with specialized interactions (e.g., Power button) and safe area handling.
-- **Rich UI/UX**:
-  - Interactive **Dashboard** for real-time overview.
-  - **Data** & **DataStorage** screens for analytics.
-  - **Map** integration for spatial data.
-  - **Settings** for deep application configuration.
-  - **Get Started** & **Loading** experiences for smooth onboarding.
+### 🔌 Intelligent Connectivity
+
+- **Hybrid Support**: Seamlessly connect to ELM327 adapters via **Bluetooth Low Energy (BLE)** or **Wi-Fi**.
+- **Auto-Reconnect**: Intelligent background management to stay connected to your vehicle.
+- **Simulation Mode**: Test and explore all features even without an adapter plugged in.
+
+### 📊 Real-Time Telemetry
+
+- **Dynamic Dashboard**: Interactive gauges for RPM, Speed, Engine Load, and more.
+- **Customizable Widgets**: Enable, disable, and reorder dashboard components to suit your driving style.
+- **High-Performance UI**: Smooth 60fps animations for real-time sensor updates.
+
+### 🛠 Powerful Diagnostics
+
+- **DTC Scanner**: Retrieve, interpret, and clear Diagnostic Trouble Codes (DTC).
+- **Human-Readable Errors**: Understand what's happening under the hood with detailed code descriptions.
+
+### 🌍 Universal Design
+
+- **Multi-language (i18n)**: Native support for English, Italian, French, German, Spanish, and Portuguese.
+- **Dynamic Theming**: Premium Dark and Light modes out of the box.
+- **Clean Architecture**: Built on a solid foundation for maximum reliability and scalability.
+
+---
 
 ## 🛠 Tech Stack
 
-- **Framework**: [React Native](https://reactnative.dev/) (0.81.5) with [Expo](https://expo.dev/) (SDK 54)
+- **Core**: [React Native](https://reactnative.dev/) (0.81.5) & [Expo](https://expo.dev/) (SDK 54)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Navigation**: [React Navigation 7](https://reactnavigation.org/) & [Expo Router](https://docs.expo.dev/router/introduction/)
-- **Styling**: StyleSheet with a centralized Theme System (Palette, Typography)
-- **Localization**: [i18next](https://www.i18next.com/) & [react-i18next](https://react.i18next.com/)
-- **Icons**: @expo/vector-icons
+- **Navigation**: [Expo Router](https://docs.expo.dev/router/introduction/)
+- **Communication**: `react-native-ble-plx` for industrial-strength BLE connectivity.
+- **Storage**: AsyncStorage for local configurations and trip histories.
+- **Localization**: [i18next](https://www.i18next.com/)
 
-## 📂 Project Structure
-
-The project follows a strict **Clean Architecture** pattern located in the `src` directory:
-
-```text
-src/
-├── core/           # Core utilities, theme configuration, and constants
-├── data/           # Data layer (API repositories, DTOs, local storage)
-├── domain/         # Business logic (Entities, Use Cases, Repository interfaces)
-└── presentation/   # UI layer (Screens, Components, Hooks)
-    ├── components/ # Reusable UI components
-    └── screens/    # Application screens (Dashboard, Map, Settings, etc.)
-```
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** (LTS recommended)
-- **npm** or **yarn**
-- **Expo Go** app on your mobile device (iOS/Android) OR an emulator.
+- **Node.js** (LTS)
+- **Expo Go** app (Android/iOS) or a suitable Emulator.
 
 ### Installation
 
-1.  Clone the repository:
-
-    ```bash
-    git clone https://github.com/your-username/drivelytix.git
-    cd drivelytix
-    ```
-
-2.  Install dependencies:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-### Running the App
-
-Start the development server:
-
-```bash
-npx expo start
-```
-
-- Press **`a`** to open in Android Emulator / device.
-- Press **`i`** to open in iOS Simulator / device.
-- Press **`w`** to open in Web browser.
-- Scan the QR code with **Expo Go** to run on a physical device.
-
-## 📝 Scripts
-
-- `npm start`: Start the Expo development server.
-- `npm run android`: Run on Android (requires Android Studio/SDK).
-- `npm run ios`: Run on iOS (requires Xcode/macOS).
-- `npm run lint`: Run ESLint analysis.
-- `npm run reset-project`: Reset the project state (custom script).
-
-## 🌍 Localization
-
-Translations are managed via `i18next`. To add a new language:
-
-1.  Create a new JSON translation file in `src/core/i18n/locales/`.
-2.  Register the new locale in the i18n configuration.
+1. Clone the repository: `git clone https://github.com/your-username/drivelytix.git`
+2. Install dependencies: `npm install`
+3. Start the engine: `npx expo start`
 
 ---
 
-Built with ❤️ by the DriveLytix Team.
+## 📂 Project Governance (Clean Architecture)
+
+```text
+src/
+├── core/           # Universal utilities, theme, and i18n
+├── data/           # Repositories and local/remote data handling
+├── domain/         # Entities and business logic
+└── presentation/   # UI layer: Screens, Components, and Hooks
+```
+
+---
+
+## 🌍 Localization
+
+Adding a language is simple:
+
+1. Create a JSON file in `src/core/locales/`.
+2. Register it in `src/core/i18n.ts`.
+
+---
+
+Built with precision by the **DriveLytix Team**.
