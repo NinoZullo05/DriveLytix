@@ -41,9 +41,20 @@
     "battery": "Batteria",
     "intake": "Aspirazione",
     "quickActions": "AZIONI RAPIDE",
-    "logs": "Registri",
+    "logs": "Log",
     "charts": "Grafici",
-    "tools": "Strumenti"
+    "tools": "Strumenti",
+    "healthAlerts": "SALUTE E AVVISI",
+    "drivingStatus": "STATO GUIDA",
+    "viewAll": "Vedi Tutto",
+    "ecoScore": "PUNTEGGIO ECO",
+    "avgSpeedUnit": "VELOCITÀ MEDIA (KM/H)",
+    "vehicleStatusLabel": "STATO VEICOLO",
+    "status": {
+      "normal": "Normale",
+      "warning": "Avviso",
+      "danger": "Pericolo"
+    }
   },
   "settings": {
     "title": "Impostazioni",
@@ -105,6 +116,10 @@
     "categories": {
       "engine": "MOTORE E PRESTAZIONI",
       "fluids": "FLUIDI E TEMPERATURE"
-    }
+    },
+    "dataOverview": "Panoramica Dati",
+    "liveParameters": "PARAMETRI LIVE",
+    "searchPlaceholder": "Cerca PID o Sensore...",
+    "active": "Attivo"
   }
 }

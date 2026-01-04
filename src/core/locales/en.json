@@ -43,7 +43,18 @@
     "quickActions": "QUICK ACTIONS",
     "logs": "Logs",
     "charts": "Charts",
-    "tools": "Tools"
+    "tools": "Tools",
+    "healthAlerts": "HEALTH & ALERTS",
+    "drivingStatus": "DRIVING STATUS",
+    "viewAll": "View All",
+    "ecoScore": "ECO SCORE",
+    "avgSpeedUnit": "AVG SPEED (KM/H)",
+    "vehicleStatusLabel": "VEHICLE STATUS",
+    "status": {
+      "normal": "Normal",
+      "warning": "Warning",
+      "danger": "Danger"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -105,6 +116,10 @@
     "categories": {
       "engine": "ENGINE & PERFORMANCE",
       "fluids": "FLUIDS & TEMPS"
-    }
+    },
+    "dataOverview": "Data Overview",
+    "liveParameters": "LIVE PARAMETERS",
+    "searchPlaceholder": "Search PID or Sensor name...",
+    "active": "Active"
   }
 }

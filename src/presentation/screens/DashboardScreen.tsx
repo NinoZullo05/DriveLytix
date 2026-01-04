@@ -15,13 +15,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { moderateScale, verticalScale } from "../../core/responsive";
 import { bluetoothService } from "../../core/services/BluetoothService";
 import { theme } from "../../core/theme";
-import {
-  CircularGauge,
-  StatCardWidget as StatCardSmall,
-} from "../components/WidgetComponents";
+import { CircularGauge } from "../components/WidgetComponents";
 
 if (
   Platform.OS === "android" &&
@@ -44,6 +40,33 @@ const QuickAction = ({ icon, label, onPress }: any) => (
     <Text style={styles.quickActionLabel}>{label}</Text>
   </TouchableOpacity>
 );
+
+const AlertCard = ({ title, value, status, icon, onPress }: any) => {
+  const statusColor =
+    status === "danger"
+      ? "#F87171"
+      : status === "warning"
+      ? "#FB923C"
+      : "#4ADE80";
+
+  return (
+    <TouchableOpacity
+      style={[styles.alertCard, { borderColor: `${statusColor}22` }]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View
+        style={[styles.alertIconBox, { backgroundColor: `${statusColor}11` }]}
+      >
+        <MaterialCommunityIcons name={icon} size={20} color={statusColor} />
+      </View>
+      <View style={styles.alertContent}>
+        <Text style={styles.alertValue}>{value}</Text>
+        <Text style={styles.alertTitle}>{title.toUpperCase()}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const DashboardScreen = () => {
   const { t } = useTranslation();
@@ -77,8 +100,6 @@ const DashboardScreen = () => {
     };
 
     loadWidgets();
-    // In a real app, we might want to use useFocusEffect or a proper state management
-    // but for now, we'll just reload periodically or when focusing.
     const interval = setInterval(loadWidgets, 2000);
     return () => clearInterval(interval);
   }, []);
@@ -88,12 +109,7 @@ const DashboardScreen = () => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.palette.dark.background },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: "#0B0F17" }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
         <View style={styles.headerLeft}>
@@ -133,66 +149,105 @@ const DashboardScreen = () => {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Dynamic Widgest - Arranged by Category/Type */}
-
-        {/* TOP SECTION: GAUGES (Primary Data) */}
-        <View style={styles.gaugesContainer}>
-          {widgets
-            .filter((w) => w.enabled && (w.id === "rpm" || w.id === "speed"))
-            .map((widget) => (
-              <View key={widget.id} style={styles.gaugeBox}>
-                <CircularGauge
-                  value={widget.id === "rpm" ? 3.2 : 84}
-                  max={widget.id === "rpm" ? 8 : 260}
-                  label={widget.id === "rpm" ? "RPM" : "KM/H"}
-                  subLabel={widget.id === "rpm" ? "x1000" : undefined}
-                  color={widget.id === "rpm" ? activeColor : "#4ADE80"}
-                  size={width * 0.42}
-                />
+        {/* VEHICLE STATUS CARD */}
+        <TouchableOpacity
+          style={styles.vehicleStatusCard}
+          onPress={() => router.push("/data")}
+          activeOpacity={0.9}
+        >
+          <View style={styles.vehicleInfo}>
+            <View style={styles.vehicleHeader}>
+              <Text style={styles.vehicleTitle}>
+                {t("home.vehicleStatusLabel")}
+              </Text>
+              <View style={styles.liveBadge}>
+                <View style={styles.liveDot} />
+                <Text style={styles.liveText}>LIVE</Text>
               </View>
-            ))}
+            </View>
+            <Text style={styles.vehicleModel}>Ford Mustang GT</Text>
+            <Text style={styles.vehicleVin}>VIN: 1FA6P8CF5H5XXXXXX</Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={24}
+            color="rgba(255,255,255,0.3)"
+          />
+        </TouchableOpacity>
+
+        {/* CRITICAL ALERTS SECTION */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t("home.healthAlerts")}</Text>
+          <Text
+            style={styles.sectionAction}
+            onPress={() => router.push("/data")}
+          >
+            {t("home.viewAll")}
+          </Text>
         </View>
 
-        {/* MIDDLE SECTION: GRID CARDS (Secondary Data) */}
-        <View style={styles.statsGrid}>
-          {widgets
-            .filter((w) => w.enabled && !["rpm", "speed"].includes(w.id))
-            .map((widget) => {
-              const widgetColor =
-                widget.id === "fuel"
-                  ? "#4ADE80"
-                  : widget.id === "coolant"
-                  ? "#FB923C"
-                  : widget.id === "oil"
-                  ? "#F87171"
-                  : widget.id === "boost"
-                  ? "#38BDF8"
-                  : activeColor;
-
-              const unit =
-                widget.id === "fuel"
-                  ? "%"
-                  : ["coolant", "oil"].includes(widget.id)
-                  ? "°C"
-                  : widget.id === "boost"
-                  ? "bar"
-                  : "";
-
-              return (
-                <View key={widget.id} style={styles.gridItem}>
-                  <StatCardSmall
-                    title={t(`widgets.${widget.titleKey}`)}
-                    value="--"
-                    unit={unit}
-                    icon={widget.icon}
-                    color={widgetColor}
-                  />
-                </View>
-              );
-            })}
+        <View style={styles.alertsContainer}>
+          <AlertCard
+            title={t("home.coolant")}
+            value="92°C"
+            status="normal"
+            icon="thermometer"
+            onPress={() => router.push("/data")}
+          />
+          <AlertCard
+            title={t("home.fuelLevel")}
+            value="15%"
+            status="warning"
+            icon="fuel"
+            onPress={() => router.push("/data")}
+          />
+          <AlertCard
+            title={t("home.battery")}
+            value="11.8V"
+            status="danger"
+            icon="flash"
+            onPress={() => router.push("/data")}
+          />
+          <AlertCard
+            title="Consumption"
+            value="Anomalous"
+            status="warning"
+            icon="chart-bell-curve-cumulative"
+            onPress={() => router.push("/data")}
+          />
         </View>
 
-        {/* Quick Actions (Always visible at bottom) */}
+        {/* DRIVING STATUS */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t("home.drivingStatus")}</Text>
+        </View>
+
+        <View style={styles.statusGrid}>
+          <View style={styles.statusItem}>
+            <CircularGauge
+              value={3.2}
+              max={8}
+              label="RPM"
+              subLabel="x1000"
+              color={activeColor}
+              size={width * 0.4}
+            />
+          </View>
+          <View style={styles.statusItem}>
+            <View style={styles.ecoCard}>
+              <MaterialCommunityIcons name="leaf" size={24} color="#4ADE80" />
+              <Text style={styles.ecoValue}>85</Text>
+              <Text style={styles.ecoLabel}>{t("home.ecoScore")}</Text>
+            </View>
+            <View style={{ height: 12 }} />
+            <View style={styles.avgSpeedCard}>
+              <Text style={styles.avgSpeedValue}>42</Text>
+              <Text style={styles.avgSpeedLabel}>{t("home.avgSpeedUnit")}</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* QUICK ACTIONS */}
         <View style={styles.quickActionsSection}>
           <Text style={styles.quickActionsTitle}>{t("home.quickActions")}</Text>
           <View style={styles.quickActionsGrid}>
@@ -222,50 +277,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: moderateScale(20),
-    paddingBottom: verticalScale(20),
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
   logoBox: {
-    width: moderateScale(44),
-    height: moderateScale(44),
-    borderRadius: moderateScale(12),
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: "#1E293B",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: moderateScale(12),
+    marginRight: 12,
     borderWidth: 1,
     borderColor: "#334155",
   },
   appName: {
-    fontSize: moderateScale(20),
+    fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
   },
   connectedRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: verticalScale(2),
+    marginTop: 2,
   },
   statusDot: {
-    width: moderateScale(6),
-    height: moderateScale(6),
-    borderRadius: moderateScale(3),
-    marginRight: moderateScale(6),
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
   },
   statusText: {
-    fontSize: moderateScale(10),
+    fontSize: 10,
     fontWeight: "bold",
     color: "rgba(255,255,255,0.5)",
     letterSpacing: 1,
   },
   settingsButton: {
-    width: moderateScale(44),
-    height: moderateScale(44),
-    borderRadius: moderateScale(22),
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#1E293B",
     justifyContent: "center",
     alignItems: "center",
@@ -273,95 +328,181 @@ const styles = StyleSheet.create({
     borderColor: "#334155",
   },
   scrollContent: {
-    paddingHorizontal: moderateScale(16),
-    paddingTop: verticalScale(8),
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
-  card: {
-    borderRadius: moderateScale(24),
-    padding: moderateScale(20),
-    marginBottom: verticalScale(20),
+  vehicleStatusCard: {
+    backgroundColor: "#151A23",
+    padding: 20,
+    borderRadius: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
+    marginBottom: 24,
   },
-  cardHeader: {
+  vehicleInfo: {
+    flex: 1,
+  },
+  vehicleHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: verticalScale(8),
+    marginBottom: 8,
   },
-  sectionTitle: {
-    fontSize: moderateScale(14),
-    color: "rgba(255,255,255,0.6)",
-    fontWeight: "500",
+  vehicleTitle: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 2,
+    marginRight: 12,
   },
   liveBadge: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(74, 222, 128, 0.1)",
-    paddingHorizontal: moderateScale(8),
-    paddingVertical: verticalScale(4),
-    borderRadius: moderateScale(20),
-    borderWidth: 1,
-    borderColor: "rgba(74, 222, 128, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
   },
   liveDot: {
-    width: moderateScale(6),
-    height: moderateScale(6),
-    borderRadius: moderateScale(3),
-    marginRight: moderateScale(6),
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#4ADE80",
+    marginRight: 6,
   },
   liveText: {
-    fontSize: moderateScale(10),
+    fontSize: 10,
     fontWeight: "bold",
     color: "#4ADE80",
   },
-  vehicleName: {
-    fontSize: moderateScale(24),
+  vehicleModel: {
+    fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: verticalScale(20),
+    marginBottom: 4,
   },
-  statsGrid: {
+  vehicleVin: {
+    fontSize: 12,
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    color: "rgba(255,255,255,0.3)",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 2,
+  },
+  sectionAction: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#00C2FF",
+  },
+  alertsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginHorizontal: -moderateScale(6),
-    marginBottom: verticalScale(20),
+    marginBottom: 24,
   },
-  gridItem: {
+  alertCard: {
     width: "48%",
-    marginHorizontal: "1%",
-    marginBottom: moderateScale(12),
+    backgroundColor: "#151A23",
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  gaugesContainer: {
+  alertIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  alertContent: {
+    flex: 1,
+  },
+  alertValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  alertTitle: {
+    fontSize: 9,
+    fontWeight: "bold",
+    color: "rgba(255,255,255,0.3)",
+    marginTop: 2,
+  },
+  statusGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: verticalScale(24),
-    gap: moderateScale(12),
+    marginBottom: 24,
   },
-  gaugeBox: {
-    flex: 1,
-    borderRadius: moderateScale(28),
-    padding: moderateScale(16),
+  statusItem: {
+    width: "48%",
+  },
+  ecoCard: {
+    backgroundColor: "#151A23",
+    padding: 16,
+    borderRadius: 20,
     alignItems: "center",
-    backgroundColor: theme.palette.dark.surface,
+    justifyContent: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+  },
+  ecoValue: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#fff",
+    marginTop: 8,
+  },
+  ecoLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  avgSpeedCard: {
+    backgroundColor: "#151A23",
+    padding: 16,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+  },
+  avgSpeedValue: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#fff",
+  },
+  avgSpeedLabel: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 1,
+    marginTop: 4,
   },
   quickActionsSection: {
-    marginTop: verticalScale(10),
+    marginTop: 8,
   },
   quickActionsTitle: {
-    fontSize: moderateScale(12),
+    fontSize: 12,
     fontWeight: "bold",
     color: "rgba(255,255,255,0.4)",
     letterSpacing: 1,
-    marginBottom: verticalScale(16),
+    marginBottom: 16,
   },
   quickActionsGrid: {
     flexDirection: "row",
@@ -371,18 +512,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   quickActionCircle: {
-    width: moderateScale(60),
-    height: moderateScale(60),
-    borderRadius: moderateScale(16),
-    backgroundColor: theme.palette.dark.surface,
+    width: 60,
+    height: 60,
+    borderRadius: 16,
+    backgroundColor: "#151A23",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: verticalScale(8),
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
   quickActionLabel: {
-    fontSize: moderateScale(12),
+    fontSize: 12,
     color: "rgba(255,255,255,0.6)",
   },
 });

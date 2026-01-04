@@ -43,6 +43,23 @@
     "quickActions": "ACCIONES RÁPIDAS",
     "logs": "Registros",
     "charts": "Gráficos",
-    "tools": "Herramientas"
+    "tools": "Herramientas",
+    "healthAlerts": "SALUD Y ALERTAS",
+    "drivingStatus": "ESTADO DE CONDUCCIÓN",
+    "viewAll": "Ver todo",
+    "ecoScore": "PUNTUACIÓN ECO",
+    "avgSpeedUnit": "VELOCIDAD PROMEDIO (KM/H)",
+    "vehicleStatusLabel": "ESTADO DEL VEHÍCULO",
+    "status": {
+      "normal": "Normal",
+      "warning": "Advertencia",
+      "danger": "Peligro"
+    }
+  },
+  "widgets": {
+    "dataOverview": "Resumen de datos",
+    "liveParameters": "PARÁMETROS EN VIVO",
+    "searchPlaceholder": "Buscar PID o sensor...",
+    "active": "Activo"
   }
 }
