@@ -447,7 +447,7 @@ const ConnectionScreen: React.FC<ConnectionScreenProps> = ({
                         { color: currentTheme.textTertiary },
                       ]}
                     >
-                      ID: {device.id}
+                      {t("connection.physicalAddress")}: {device.id}
                     </Text>
                   </View>
                 </View>

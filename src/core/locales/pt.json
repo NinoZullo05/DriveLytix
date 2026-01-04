@@ -9,8 +9,40 @@
     "taglinePart2": "Sua direção.",
     "connecting": "CONECTANDO À ECU..."
   },
+  "connection": {
+    "title": "Conexão",
+    "help": "Ajuda",
+    "readyToScan": "Pronto para Escanear",
+    "scanForDevices": "Procurar Dispositivos",
+    "scanning": "Escaneando...",
+    "stopScan": "Parar Escaneamento",
+    "lastConnected": "ÚLTIMA CONEXÃO",
+    "availableDevices": "DISPOSITIVOS DISPONÍVEIS",
+    "noDevices": "Nenhum dispositivo encontrado. Pressione Escanear para começar.",
+    "connectAdapter": "Conectar Adaptador",
+    "connectInstructions": "Certifique-se de que a ignição esteja LIGADA e o adaptador OBD-II esteja firmemente conectado.",
+    "troubleConnecting": "Problemas ao conectar?",
+    "new": "NOVO",
+    "skip": "Pular",
+    "physicalAddress": "Endereço Físico",
+    "connectedAlert": "Conectado",
+    "connectedMessage": "Conectado com sucesso a {{name}}",
+    "disconnected": "Desconectado"
+  },
   "home": {
     "welcome": "Bem-vindo ao DriveLytix!",
-    "loaded": "App carregado com sucesso"
+    "loaded": "App carregado com sucesso",
+    "vehicleStatus": "Status do Veículo",
+    "avgSpeed": "Velocidade Média",
+    "fuelLevel": "Nível de Combustível",
+    "coolant": "Líquido de Arrefecimento",
+    "engineLoad": "Carga do Motor",
+    "ecoDriving": "Condução Eco",
+    "battery": "Bateria",
+    "intake": "Admissão",
+    "quickActions": "AÇÕES RÁPIDAS",
+    "logs": "Logs",
+    "charts": "Gráficos",
+    "tools": "Ferramentas"
   }
 }

@@ -9,8 +9,40 @@
     "taglinePart2": "Votre conduite.",
     "connecting": "CONNEXION À L'ECU..."
   },
+  "connection": {
+    "title": "Connexion",
+    "help": "Aide",
+    "readyToScan": "Prêt à scanner",
+    "scanForDevices": "Rechercher des appareils",
+    "scanning": "Recherche...",
+    "stopScan": "Arrêter la recherche",
+    "lastConnected": "DERNIÈRE CONNEXION",
+    "availableDevices": "APPAREILS DISPONIBLES",
+    "noDevices": "Aucun appareil trouvé. Appuyez sur Scan pour commencer.",
+    "connectAdapter": "Connecter l'adaptateur",
+    "connectInstructions": "Assurez-vous que le contact est mis et que l'adaptateur OBD-II est fermement branché.",
+    "troubleConnecting": "Problèmes de connexion ?",
+    "new": "NOUVEAU",
+    "skip": "Passer",
+    "physicalAddress": "Adresse Physique",
+    "connectedAlert": "Connecté",
+    "connectedMessage": "Connecté avec succès à {{name}}",
+    "disconnected": "Déconnecté"
+  },
   "home": {
     "welcome": "Bienvenue sur DriveLytix !",
-    "loaded": "App chargée avec succès"
+    "loaded": "App chargée avec succès",
+    "vehicleStatus": "Statut du véhicule",
+    "avgSpeed": "Vitesse moyenne",
+    "fuelLevel": "Niveau de carburant",
+    "coolant": "Liquide de refroidissement",
+    "engineLoad": "Charge moteur",
+    "ecoDriving": "Éco-conduite",
+    "battery": "Batterie",
+    "intake": "Admission",
+    "quickActions": "ACTIONS RAPIDES",
+    "logs": "Journaux",
+    "charts": "Graphiques",
+    "tools": "Outils"
   }
 }

@@ -4,15 +4,25 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  LayoutAnimation,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
   TouchableOpacity,
+  UIManager,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { theme } from "../../core/theme";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface Widget {
   id: string;
@@ -105,10 +115,31 @@ const WidgetManagementScreen = () => {
 
   // Save widgets on change
   const toggleWidget = async (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const updated = widgets.map((w) =>
       w.id === id ? { ...w, enabled: !w.enabled } : w
     );
     setWidgets(updated);
+    saveWidgets(updated);
+  };
+
+  const moveWidget = async (id: string, direction: "up" | "down") => {
+    const index = widgets.findIndex((w) => w.id === id);
+    if (index === -1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= widgets.length) return;
+
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const updated = [...widgets];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, moved);
+
+    setWidgets(updated);
+    saveWidgets(updated);
+  };
+
+  const saveWidgets = async (updated: Widget[]) => {
     try {
       await AsyncStorage.setItem(WIDGET_STORAGE_KEY, JSON.stringify(updated));
     } catch (e) {
@@ -117,6 +148,7 @@ const WidgetManagementScreen = () => {
   };
 
   const resetToDefaults = async () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setWidgets(DEFAULT_WIDGETS);
     try {
       await AsyncStorage.removeItem(WIDGET_STORAGE_KEY);
@@ -165,48 +197,81 @@ const WidgetManagementScreen = () => {
             </View>
 
             {widgets
+              // Grouping by category makes reordering less intuitive if they restricted to categories,
+              // but for now let's keep the category view and just allow moving within the list.
               .filter((w) => w.categoryKey === categoryKey)
-              .map((widget) => (
-                <View key={widget.id} style={styles.widgetCard}>
-                  <View
-                    style={[
-                      styles.iconContainer,
-                      { backgroundColor: theme.palette.dark.surface },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={widget.icon as any}
-                      size={24}
-                      color={theme.palette.primary}
-                    />
+              .map((widget, index) => {
+                const globalIndex = widgets.findIndex(
+                  (w) => w.id === widget.id
+                );
+                return (
+                  <View key={widget.id} style={styles.widgetCard}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        { backgroundColor: theme.palette.dark.surface },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={widget.icon as any}
+                        size={24}
+                        color={theme.palette.primary}
+                      />
+                    </View>
+                    <View style={styles.widgetInfo}>
+                      <Text style={styles.widgetTitle}>
+                        {t(`widgets.${widget.titleKey}`)}
+                      </Text>
+                      <Text style={styles.widgetDescription}>
+                        {t(`widgets.${widget.descriptionKey}`)}
+                      </Text>
+                    </View>
+                    <View style={styles.controls}>
+                      <View style={styles.reorderButtons}>
+                        <TouchableOpacity
+                          onPress={() => moveWidget(widget.id, "up")}
+                          disabled={globalIndex === 0}
+                          style={[
+                            styles.reorderBtn,
+                            globalIndex === 0 && { opacity: 0.2 },
+                          ]}
+                        >
+                          <MaterialCommunityIcons
+                            name="chevron-up"
+                            size={20}
+                            color="#fff"
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => moveWidget(widget.id, "down")}
+                          disabled={globalIndex === widgets.length - 1}
+                          style={[
+                            styles.reorderBtn,
+                            globalIndex === widgets.length - 1 && {
+                              opacity: 0.2,
+                            },
+                          ]}
+                        >
+                          <MaterialCommunityIcons
+                            name="chevron-down"
+                            size={20}
+                            color="#fff"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                      <Switch
+                        value={widget.enabled}
+                        onValueChange={() => toggleWidget(widget.id)}
+                        trackColor={{
+                          false: "#1E293B",
+                          true: theme.palette.primary,
+                        }}
+                        thumbColor="#fff"
+                      />
+                    </View>
                   </View>
-                  <View style={styles.widgetInfo}>
-                    <Text style={styles.widgetTitle}>
-                      {t(`widgets.${widget.titleKey}`)}
-                    </Text>
-                    <Text style={styles.widgetDescription}>
-                      {t(`widgets.${widget.descriptionKey}`)}
-                    </Text>
-                  </View>
-                  <View style={styles.controls}>
-                    <Switch
-                      value={widget.enabled}
-                      onValueChange={() => toggleWidget(widget.id)}
-                      trackColor={{
-                        false: "#1E293B",
-                        true: theme.palette.primary,
-                      }}
-                      thumbColor="#fff"
-                    />
-                    <MaterialCommunityIcons
-                      name="drag-horizontal-variant"
-                      size={24}
-                      color="rgba(255,255,255,0.3)"
-                      style={{ marginLeft: 12 }}
-                    />
-                  </View>
-                </View>
-              ))}
+                );
+              })}
           </View>
         ))}
 
@@ -320,6 +385,15 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  reorderButtons: {
+    flexDirection: "column",
+    marginRight: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  reorderBtn: {
+    padding: 2,
   },
   resetButton: {
     flexDirection: "row",

@@ -9,8 +9,40 @@
     "taglinePart2": "Deine Fahrt.",
     "connecting": "VERBINDUNG ZUR ECU..."
   },
+  "connection": {
+    "title": "Verbindung",
+    "help": "Hilfe",
+    "readyToScan": "Bereit zum Scannen",
+    "scanForDevices": "Nach Geräten suchen",
+    "scanning": "Scannen...",
+    "stopScan": "Scan stoppen",
+    "lastConnected": "ZULETZT VERBUNDEN",
+    "availableDevices": "VERFÜGBARE GERÄTE",
+    "noDevices": "Keine Geräte gefunden. Drücken Sie Scan, um zu starten.",
+    "connectAdapter": "Adapter anschließen",
+    "connectInstructions": "Stellen Sie sicher, dass die Zündung EINGESCHALTET ist und der OBD-II-Adapter fest eingesteckt ist.",
+    "troubleConnecting": "Probleme beim Verbinden?",
+    "new": "NEU",
+    "skip": "Überspringen",
+    "physicalAddress": "Physische Adresse",
+    "connectedAlert": "Verbunden",
+    "connectedMessage": "Erfolgreich verbunden mit {{name}}",
+    "disconnected": "Getrennt"
+  },
   "home": {
     "welcome": "Willkommen bei DriveLytix!",
-    "loaded": "App erfolgreich geladen"
+    "loaded": "App erfolgreich geladen",
+    "vehicleStatus": "Fahrzeugstatus",
+    "avgSpeed": "Durchschn. Geschw.",
+    "fuelLevel": "Kraftstoffstand",
+    "coolant": "Kühlmittel",
+    "engineLoad": "Motorlast",
+    "ecoDriving": "Eco-Fahren",
+    "battery": "Batterie",
+    "intake": "Ansaugung",
+    "quickActions": "SCHNELLZUGRIFF",
+    "logs": "Protokolle",
+    "charts": "Diagramme",
+    "tools": "Werkzeuge"
   }
 }

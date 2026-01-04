@@ -102,15 +102,15 @@ class BluetoothService {
         // Conditional mock devices
         if (this.simulationMode) {
             const mockDevices: BluetoothDevice[] = [
-                { id: 'SIM-OBDII-001', name: 'SIMULATED-ELM327', rssi: -45, status: 'new' },
-                { id: 'SIM-PRO-002', name: 'DriveLytix Pro Adapter (Sim)', rssi: -32, status: 'new' },
+                { id: 'AA:BB:CC:DD:EE:FF', name: 'OBDII-ELM327', rssi: -45, status: 'new' },
+                { id: '11:22:33:44:55:66', name: 'DriveLytix Pro (Sim)', rssi: -32, status: 'new' },
             ];
             mockDevices.forEach(d => foundDevices.set(d.id, d));
             callback(Array.from(foundDevices.values()));
         }
 
         // Start real scan
-        this.manager.startDeviceScan(null, { allowDuplicates: false }, (error, device) => {
+        this.manager.startDeviceScan(null, { allowDuplicates: true }, (error, device) => {
             if (error) {
                 if (this.simulationMode) {
                     console.log("Real scan failed, but continuing in simulation mode.");
@@ -124,15 +124,19 @@ class BluetoothService {
 
             if (device) {
                  const name = device.name || device.localName || 'Unknown Device';
-                 foundDevices.set(device.id, {
-                     id: device.id,
-                     name: name,
-                     rssi: device.rssi || -100,
-                     status: 'new',
-                     rawDevice: device
-                 });
-
-                 callback(Array.from(foundDevices.values()));
+                 const existing = foundDevices.get(device.id);
+                 
+                 // Only update if we found a name for a previously "Unknown Device" or it's a new device
+                 if (!existing || (existing.name === 'Unknown Device' && name !== 'Unknown Device') || existing.rssi !== device.rssi) {
+                     foundDevices.set(device.id, {
+                         id: device.id,
+                         name: name,
+                         rssi: device.rssi || -100,
+                         status: 'new',
+                         rawDevice: device
+                     });
+                     callback(Array.from(foundDevices.values()));
+                 }
             }
         });
 

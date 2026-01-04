@@ -24,6 +24,7 @@
     "troubleConnecting": "Problemi di connessione?",
     "new": "NUOVO",
     "skip": "Salta",
+    "physicalAddress": "Indirizzo Fisico",
     "connectedAlert": "Connesso",
     "connectedMessage": "Connesso con successo a {{name}}",
     "disconnected": "Disconnesso"

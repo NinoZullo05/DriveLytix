@@ -24,6 +24,7 @@
     "troubleConnecting": "Having trouble connecting?",
     "new": "NEW",
     "skip": "Skip",
+    "physicalAddress": "Physical Address",
     "connectedAlert": "Connected",
     "connectedMessage": "Successfully connected to {{name}}",
     "disconnected": "Disconnected"
