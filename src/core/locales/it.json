@@ -115,7 +115,9 @@
     "oilDesc": "Calore olio motore",
     "categories": {
       "engine": "MOTORE E PRESTAZIONI",
-      "fluids": "FLUIDI E TEMPERATURE"
+      "fluids": "FLUIDI E TEMPERATURE",
+      "electrical": "SISTEMA ELETTRICO",
+      "misc": "ALTRE MISURAZIONI"
     },
     "dataOverview": "Panoramica Dati",
     "liveParameters": "PARAMETRI LIVE",

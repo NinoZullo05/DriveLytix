@@ -115,7 +115,9 @@
     "oilDesc": "Engine oil heat",
     "categories": {
       "engine": "ENGINE & PERFORMANCE",
-      "fluids": "FLUIDS & TEMPS"
+      "fluids": "FLUIDS & TEMPS",
+      "electrical": "ELECTRICAL SYSTEM",
+      "misc": "MISCELLANEOUS"
     },
     "dataOverview": "Data Overview",
     "liveParameters": "LIVE PARAMETERS",

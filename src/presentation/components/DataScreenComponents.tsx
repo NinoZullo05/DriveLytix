@@ -2,103 +2,130 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { Sensor } from "../../domain/entities/Sensor";
 
 /* ---------------- GRAPH COMPONENTS ---------------- */
 
 export const MiniAreaChart = ({
   color,
-  points,
+  data,
 }: {
   color: string;
-  points: string;
-}) => (
-  <View style={styles.graphContainer}>
-    <Svg height="40" width="100%">
-      <Path d={points} stroke={color} strokeWidth="2" fill={`${color}33`} />
-    </Svg>
-  </View>
-);
+  data: { value: number }[];
+}) => {
+  if (!data || data.length < 2) {
+    return (
+      <View style={styles.graphContainer}>
+        <View
+          style={[styles.placeholderLine, { backgroundColor: `${color}33` }]}
+        />
+      </View>
+    );
+  }
 
-export const MiniWaveChart = ({ color }: { color: string }) => (
-  <View style={styles.graphContainer}>
-    <Svg height="40" width="100%">
-      <Path
-        d="M0 20 Q 25 5, 50 20 T 100 20"
-        stroke={color}
-        strokeWidth="2"
-        fill="none"
-      />
-    </Svg>
-  </View>
-);
+  const width = 100;
+  const height = 40;
+  const max = Math.max(...data.map((d) => d.value), 1);
+  const min = Math.min(...data.map((d) => d.value), 0);
+  const range = max - min || 1;
+
+  const points = data
+    .map((d, i) => {
+      const x = (i / (data.length - 1)) * width;
+      const y = height - ((d.value - min) / range) * height;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  const areaPoints = `0,${height} ${points} ${width},${height}`;
+
+  return (
+    <View style={styles.graphContainer}>
+      <Svg height="100%" width="100%" viewBox={`0 0 ${width} ${height}`}>
+        <Path d={`M ${points}`} stroke={color} strokeWidth="2" fill="none" />
+        <Path d={`M ${areaPoints}`} fill={`${color}33`} stroke="none" />
+      </Svg>
+    </View>
+  );
+};
 
 /* ---------------- CARD COMPONENTS ---------------- */
 
 export const DataCardGraph = ({
-  title,
-  value,
-  unit,
-  icon,
-  color,
-  chartType = "area",
-  points = "M0 40 L20 30 L40 35 L60 20 L80 25 L100 10 L100 40 L0 40 Z",
-}: any) => (
+  sensor,
+  onPress,
+}: {
+  sensor: Sensor;
+  onPress?: () => void;
+}) => (
   <View style={[styles.card, { backgroundColor: "#151A23" }]}>
     <View style={styles.cardHeader}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      {icon && (
-        <MaterialCommunityIcons
-          name={icon}
-          size={16}
-          color="rgba(255,255,255,0.3)"
-        />
-      )}
-    </View>
-    <View style={styles.cardBody}>
-      <Text style={styles.cardValue}>{value}</Text>
-      <Text style={styles.cardUnit}>{unit}</Text>
-    </View>
-    {chartType === "area" ? (
-      <MiniAreaChart color={color} points={points} />
-    ) : (
-      <MiniWaveChart color={color} />
-    )}
-  </View>
-);
-
-export const DataCardProgress = ({ title, value, unit, progress }: any) => (
-  <View style={[styles.card, { backgroundColor: "#151A23" }]}>
-    <View style={styles.cardHeader}>
-      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={styles.cardTitle}>{sensor.name}</Text>
       <MaterialCommunityIcons
-        name="clock-outline"
+        name={sensor.icon as any}
         size={16}
         color="rgba(255,255,255,0.3)"
       />
     </View>
     <View style={styles.cardBody}>
-      <Text style={styles.cardValue}>{value}</Text>
-      <Text style={styles.cardUnit}>{unit}</Text>
+      <Text style={styles.cardValue}>
+        {sensor.currentValue.toFixed(sensor.unit === "V" ? 1 : 0)}
+      </Text>
+      <Text style={styles.cardUnit}>{sensor.unit}</Text>
     </View>
-    <View style={styles.progressBarBg}>
-      <View
-        style={[
-          styles.progressBarFill,
-          { width: `${progress}%`, backgroundColor: "#A855F7" },
-        ]}
-      />
-    </View>
+    <MiniAreaChart color={sensor.color} data={sensor.history} />
   </View>
 );
 
-export const DataCardMini = ({ title, value, icon, color }: any) => (
+export const DataCardProgress = ({ sensor }: { sensor: Sensor }) => {
+  const progress =
+    ((sensor.currentValue - sensor.minValue) /
+      (sensor.maxValue - sensor.minValue)) *
+    100;
+
+  return (
+    <View style={[styles.card, { backgroundColor: "#151A23" }]}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle}>{sensor.name}</Text>
+        <MaterialCommunityIcons
+          name={sensor.icon as any}
+          size={16}
+          color="rgba(255,255,255,0.3)"
+        />
+      </View>
+      <View style={styles.cardBody}>
+        <Text style={styles.cardValue}>{sensor.currentValue.toFixed(0)}</Text>
+        <Text style={styles.cardUnit}>{sensor.unit}</Text>
+      </View>
+      <View style={styles.progressBarBg}>
+        <View
+          style={[
+            styles.progressBarFill,
+            { width: `${progress}%`, backgroundColor: sensor.color },
+          ]}
+        />
+      </View>
+    </View>
+  );
+};
+
+export const DataCardMini = ({ sensor }: { sensor: Sensor }) => (
   <View style={[styles.miniCard, { backgroundColor: "#151A23" }]}>
-    <View style={[styles.miniIconBox, { backgroundColor: `${color}22` }]}>
-      <MaterialCommunityIcons name={icon} size={20} color={color} />
+    <View
+      style={[styles.miniIconBox, { backgroundColor: `${sensor.color}22` }]}
+    >
+      <MaterialCommunityIcons
+        name={sensor.icon as any}
+        size={20}
+        color={sensor.color}
+      />
     </View>
     <View>
-      <Text style={styles.miniTitle}>{title}</Text>
-      <Text style={styles.miniValue}>{value}</Text>
+      <Text style={styles.miniTitle}>{sensor.name}</Text>
+      <Text style={styles.miniValue}>
+        {sensor.currentValue.toFixed(0)}
+        {sensor.unit}
+      </Text>
     </View>
   </View>
 );
@@ -109,9 +136,9 @@ export const CategoryHeader = ({ title, activeCount, dotColor }: any) => (
       <View style={[styles.categoryDot, { backgroundColor: dotColor }]} />
       <Text style={styles.categoryTitle}>{title.toUpperCase()}</Text>
     </View>
-    {activeCount && (
+    {activeCount !== undefined && (
       <View style={styles.activeBadge}>
-        <Text style={styles.activeBadgeText}>{activeCount} Active</Text>
+        <Text style={styles.activeBadgeText}>{activeCount} Sensors</Text>
       </View>
     )}
   </View>
@@ -158,6 +185,12 @@ const styles = StyleSheet.create({
     height: 40,
     marginTop: 10,
     width: "100%",
+  },
+  placeholderLine: {
+    height: 2,
+    width: "100%",
+    borderRadius: 1,
+    marginTop: 19,
   },
   progressBarBg: {
     height: 6,
