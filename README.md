@@ -51,7 +51,7 @@
 
 ### Installation
 
-1. Clone the repository: `git clone https://github.com/your-username/drivelytix.git`
+1. Clone the repository: `git clone https://github.com/NinoZullo05/DriveLytix.git`
 2. Install dependencies: `npm install`
 3. Start the engine: `npx expo start`
 
