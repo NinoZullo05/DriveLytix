@@ -14,7 +14,7 @@ import { theme } from "../../core/theme";
 
 import DashboardScreen from "../screens/DashboardScreen";
 import DataScreen from "../screens/DataScreen";
-import MapScreen from "../screens/MapScreen";
+import DiagnosticsScreen from "../screens/DiagnosticsScreen"; // Changed from MapScreen
 import PowerScreen from "../screens/PowerScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 
@@ -93,8 +93,8 @@ const BottomNavigationbar = () => {
             case "Data":
               iconName = focused ? "bar-chart" : "bar-chart-outline";
               break;
-            case "Map":
-              iconName = focused ? "map" : "map-outline";
+            case "Diagnostics":
+              iconName = focused ? "warning" : "warning-outline";
               break;
             case "Settings":
               iconName = focused ? "person" : "person-outline";
@@ -127,7 +127,13 @@ const BottomNavigationbar = () => {
         }}
       />
 
-      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen
+        name="Diagnostics"
+        component={DiagnosticsScreen}
+        options={{
+          tabBarLabel: "DTC",
+        }}
+      />
 
       <Tab.Screen
         name="Settings"

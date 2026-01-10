@@ -3,16 +3,28 @@
 
 import { Sensor } from '../../domain/entities/Sensor';
 
+import { telemetryService, TelemetryService } from './TelemetryService';
+
 class SensorService {
   private sensors: Map<string, Sensor> = new Map();
   private listeners: Set<(sensors: Sensor[]) => void> = new Set();
-  private simulationInterval: ReturnType<typeof setInterval> | null = null;
+  private telemetryService: TelemetryService;
 
   constructor() {
+    this.telemetryService = telemetryService;
     this.initializeSensors();
+    
+    // Subscribe to real telemetry updates
+    this.telemetryService.subscribe((updatedSensors) => {
+        updatedSensors.forEach(s => {
+            this.sensors.set(s.id, s);
+        });
+        this.notifyListeners();
+    });
   }
 
   private initializeSensors() {
+    // Initial population can come from TelemetryService or defaults
     const initialSensors: Sensor[] = [
       {
         id: 'rpm',
@@ -42,117 +54,42 @@ class SensorService {
         currentValue: 0,
         history: [],
       },
-      {
-        id: 'load',
-        name: 'Calculated Load',
-        pid: '0104',
-        unit: '%',
-        category: 'engine',
-        icon: 'engine-outline',
-        color: '#A855F7',
-        minValue: 0,
-        maxValue: 100,
-        defaultValue: 15,
-        currentValue: 15,
-        history: [],
-      },
-      {
-        id: 'coolant',
-        name: 'Coolant Temp',
-        pid: '0105',
-        unit: '°C',
-        category: 'fluids',
-        icon: 'thermometer',
-        color: '#FB923C',
-        minValue: -40,
-        maxValue: 215,
-        defaultValue: 90,
-        currentValue: 90,
-        history: [],
-      },
-      {
-        id: 'oil_temp',
-        name: 'Oil Temp',
-        pid: '015C',
-        unit: '°C',
-        category: 'fluids',
-        icon: 'oil',
-        color: '#F87171',
-        minValue: -40,
-        maxValue: 215,
-        defaultValue: 95,
-        currentValue: 95,
-        history: [],
-      },
-      {
-        id: 'intake_temp',
-        name: 'Intake Temp',
-        pid: '010F',
-        unit: '°C',
-        category: 'fluids',
-        icon: 'weather-windy',
-        color: '#38BDF8',
-        minValue: -40,
-        maxValue: 215,
-        defaultValue: 35,
-        currentValue: 35,
-        history: [],
-      },
-      {
-        id: 'fuel_pressure',
-        name: 'Fuel Pressure',
-        pid: '010A',
-        unit: 'kPa',
-        category: 'fluids',
-        icon: 'arrow-collapse-vertical',
-        color: '#FACC15',
-        minValue: 0,
-        maxValue: 765,
-        defaultValue: 380,
-        currentValue: 380,
-        history: [],
-      },
-      {
-        id: 'voltage',
-        name: 'Module Voltage',
-        pid: '0142',
-        unit: 'V',
-        category: 'electrical',
-        icon: 'flash',
-        color: '#4ADE80',
-        minValue: 0,
-        maxValue: 18,
-        defaultValue: 13.8,
-        currentValue: 13.8,
-        history: [],
-      },
-      {
-        id: 'maf',
-        name: 'Mass Air Flow',
-        pid: '0110',
-        unit: 'g/s',
-        category: 'engine',
-        icon: 'windsock',
-        color: '#22D3EE',
-        minValue: 0,
-        maxValue: 655,
-        defaultValue: 12.5,
-        currentValue: 12.5,
-        history: [],
-      },
+      // ... Add other default sensors if needed or rely on TelemetryService to populate them
     ];
-
+    // For now we keep the manually defined list to ensure UI has something before connection
+    // But we map them to the same IDs as TelemetryService uses (PIDs preferably, or mapped IDs)
+    // Note: TelemetryService uses PIDs as IDs (e.g. '010C'). SensorService used 'rpm'.
+    // We need a mapping or unification.
+    // TelemetryService currently uses PIDs as IDs.
+    // I will unify this by ensuring TelemetryService uses friendly IDs OR SensorService maps PIDs to friendly IDs.
+    // For this refactor, I will modify TelemetryService to use friendly IDs (via PID_MAP names) or just accept PIDs in UI.
+    // Actually, let's keep the existing ID mechanism in SensorService for specific UI widgets, but update them from TelemetryService.
+    
+    // Mapping PID to SensorService ID
+    // 010C -> rpm
+    // 010D -> speed
+    
     initialSensors.forEach((s) => this.sensors.set(s.id, s));
   }
+
+  // Map PIDs to internal IDs
+  private pidToIdMap: Record<string, string> = {
+      '010C': 'rpm',
+      '010D': 'speed',
+      '0104': 'load',
+      '0105': 'coolant',
+      '015C': 'oil_temp',
+      '010F': 'intake_temp',
+      '010A': 'fuel_pressure',
+      '0142': 'voltage',
+      '0110': 'maf',
+  };
 
   private refreshRate = 1000;
 
   setRefreshRate(ms: number) {
     this.refreshRate = ms;
-    if (this.simulationInterval) {
-      this.stopSimulation();
-      this.startSimulation();
-    }
+    // Pass to telemetry service if supported
   }
 
   getRefreshRate(): number {
@@ -160,37 +97,40 @@ class SensorService {
   }
 
   startSimulation() {
-    if (this.simulationInterval) return;
-
-    this.simulationInterval = setInterval(() => {
-      this.sensors.forEach((sensor) => {
-        let newValue = sensor.currentValue;
-        
-        // Simple random walk for simulation
-        const delta = (Math.random() - 0.5) * (sensor.maxValue - sensor.minValue) * 0.05;
-        newValue += delta;
-        
-        // Clamp values
-        newValue = Math.max(sensor.minValue, Math.min(sensor.maxValue, newValue));
-        
-        sensor.currentValue = newValue;
-        sensor.history.push({ value: newValue, timestamp: Date.now() });
-        
-        // Keep last 50 points
-        if (sensor.history.length > 50) {
-          sensor.history.shift();
+    // Determine if we should scan for real device or just start logic
+    // For this transition, we might trigger a scan
+    console.log("Starting Sensor Service (Real Mode)");
+    // Auto-scan or Auto-connect could go here
+    this.telemetryService.scanForDevices().then(devices => {
+        console.log("Found devices:", devices);
+        if (devices.length > 0) {
+            this.telemetryService.connect(devices[0].id);
         }
-      });
+    });
 
-      this.notifyListeners();
-    }, this.refreshRate);
+    // We can also trigger a listener to TelemetryService here to map data
+    this.telemetryService.subscribe((realSensors) => {
+        realSensors.forEach(real => {
+            // Find which 'friendly' sensor this corresponds to
+            // Real sensor ID is likely a PID e.g. '010C'
+            const friendlyId = this.pidToIdMap[real.id] || real.id;
+            const existing = this.sensors.get(friendlyId);
+            
+            if (existing) {
+                existing.currentValue = real.currentValue;
+                existing.history = real.history;
+                this.sensors.set(friendlyId, existing);
+            } else {
+                // New sensor discovered via OBD
+                this.sensors.set(real.id, real);
+            }
+        });
+        this.notifyListeners();
+    });
   }
 
   stopSimulation() {
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
-    }
+     this.telemetryService.disconnect();
   }
 
   getSensors(): Sensor[] {
@@ -214,5 +154,4 @@ class SensorService {
     this.listeners.forEach((callback) => callback(sensors));
   }
 }
-
 export const sensorService = new SensorService();
