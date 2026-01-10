@@ -81,6 +81,7 @@ graph TD
 
 ### Installation
 
+<<<<<<< HEAD
 1. **Clone the Repository**
 
    ```bash
@@ -101,6 +102,11 @@ graph TD
    ```
 
 4. **Connect**: Open the app, grant Bluetooth permissions, and it will automatically scan for compatible adapters.
+=======
+1. Clone the repository: `git clone https://github.com/NinoZullo05/DriveLytix.git`
+2. Install dependencies: `npm install`
+3. Start the engine: `npx expo start`
+>>>>>>> 647d4360b82857e582bc6f228cdffaf2ec5fc952
 
 ---
 
