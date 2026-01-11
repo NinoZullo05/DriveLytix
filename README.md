@@ -81,11 +81,10 @@ graph TD
 
 ### Installation
 
-<<<<<<< HEAD
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/Start-Up-DriveLytix/DriveLytix.git
+   git clone https://github.com/NinoZullo05/DriveLytix.git
    cd DriveLytix
    ```
 
@@ -102,11 +101,6 @@ graph TD
    ```
 
 4. **Connect**: Open the app, grant Bluetooth permissions, and it will automatically scan for compatible adapters.
-=======
-1. Clone the repository: `git clone https://github.com/NinoZullo05/DriveLytix.git`
-2. Install dependencies: `npm install`
-3. Start the engine: `npx expo start`
->>>>>>> 647d4360b82857e582bc6f228cdffaf2ec5fc952
 
 ---
 
@@ -140,5 +134,3 @@ We welcome engineers, designers, and automotive experts.
 5. **Open a Pull Request**.
 
 ---
-
-_Engineered with 🔧 & 🏎️ by the DriveLytix Team._

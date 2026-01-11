@@ -1,5 +1,4 @@
-import { Sensor } from '../../domain/entities/Sensor';
-import { telemetryService, TelemetryService } from './TelemetryService';
+import { useTelemetryStore } from '../store/TelemetryStore';
 
 export interface Anomaly {
   id: string;
@@ -11,41 +10,40 @@ export interface Anomaly {
 }
 
 export class AnalysisService {
-  private telemetry: TelemetryService;
   private anomalies: Anomaly[] = [];
   private listeners: Set<(anomalies: Anomaly[]) => void> = new Set();
 
   constructor() {
-    this.telemetry = telemetryService;
-    this.telemetry.subscribe(this.analyze.bind(this));
+    // Subscribe to store updates
+    useTelemetryStore.subscribe((state) => {
+        this.analyze(state.latestValues);
+    });
   }
 
-  private analyze(sensors: Sensor[]) {
+  private analyze(values: Record<string, number>) {
     let newAnomalyDetected = false;
-
-    sensors.forEach(sensor => {
-      // Example Logic: Overheating
-      if (sensor.id === '0105' || sensor.id === 'coolant') {
-        if (sensor.currentValue > 110) {
-           this.addAnomaly({
+    
+    // Check Coolant (0105)
+    if (values['0105'] !== undefined) {
+         if (values['0105'] > 110) {
+              this.addAnomaly({
                id: Date.now().toString(),
                type: 'critical',
                message: 'Engine Overheating Detected',
                timestamp: Date.now(),
-               sensorId: sensor.id,
-               value: sensor.currentValue
+               sensorId: '0105',
+               value: values['0105']
            });
            newAnomalyDetected = true;
-        }
-      }
+         }
+    }
 
-      // Example Logic: High Load
-      if (sensor.id === '0104' || sensor.id === 'load') {
-          if (sensor.currentValue > 90) {
-              // Debounce or check duration usually
+    // Check Load (0104)
+    if (values['0104'] !== undefined) {
+          if (values['0104'] > 95) {
+               // High load check
           }
-      }
-    });
+    }
 
     if (newAnomalyDetected) {
         this.notifyListeners();

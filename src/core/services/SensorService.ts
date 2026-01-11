@@ -1,8 +1,7 @@
-
 // src/core/services/SensorService.ts
 
 import { Sensor } from '../../domain/entities/Sensor';
-
+import { useTelemetryStore } from '../store/TelemetryStore';
 import { telemetryService, TelemetryService } from './TelemetryService';
 
 class SensorService {
@@ -14,12 +13,31 @@ class SensorService {
     this.telemetryService = telemetryService;
     this.initializeSensors();
     
-    // Subscribe to real telemetry updates
-    this.telemetryService.subscribe((updatedSensors) => {
-        updatedSensors.forEach(s => {
-            this.sensors.set(s.id, s);
+    // Subscribe to real telemetry updates via Zustand
+    // We subscribe to 'latestValues'
+    useTelemetryStore.subscribe((state) => {
+        const latest = state.latestValues;
+        let changed = false;
+        
+        Object.entries(latest).forEach(([pid, value]) => {
+             // Map PID to friendly ID if needed, or use PID
+             const friendlyId = this.pidToIdMap[pid] || pid;
+             const existing = this.sensors.get(friendlyId);
+             
+             if (existing && existing.currentValue !== value) {
+                 existing.currentValue = value;
+                 existing.history.push({ value, timestamp: Date.now() });
+                   if (existing.history.length > 50) {
+                      existing.history.shift();
+                   }
+                 this.sensors.set(friendlyId, existing);
+                 changed = true;
+             }
         });
-        this.notifyListeners();
+
+        if (changed) {
+            this.notifyListeners();
+        }
     });
   }
 
@@ -61,8 +79,7 @@ class SensorService {
     // Note: TelemetryService uses PIDs as IDs (e.g. '010C'). SensorService used 'rpm'.
     // We need a mapping or unification.
     // TelemetryService currently uses PIDs as IDs.
-    // I will unify this by ensuring TelemetryService uses friendly IDs OR SensorService maps PIDs to friendly IDs.
-    // For this refactor, I will modify TelemetryService to use friendly IDs (via PID_MAP names) or just accept PIDs in UI.
+    // I will unify this by ensuring TelemetryService uses friendly IDs (via PID_MAP names) or just accept PIDs in UI.
     // Actually, let's keep the existing ID mechanism in SensorService for specific UI widgets, but update them from TelemetryService.
     
     // Mapping PID to SensorService ID
@@ -106,26 +123,6 @@ class SensorService {
         if (devices.length > 0) {
             this.telemetryService.connect(devices[0].id);
         }
-    });
-
-    // We can also trigger a listener to TelemetryService here to map data
-    this.telemetryService.subscribe((realSensors) => {
-        realSensors.forEach(real => {
-            // Find which 'friendly' sensor this corresponds to
-            // Real sensor ID is likely a PID e.g. '010C'
-            const friendlyId = this.pidToIdMap[real.id] || real.id;
-            const existing = this.sensors.get(friendlyId);
-            
-            if (existing) {
-                existing.currentValue = real.currentValue;
-                existing.history = real.history;
-                this.sensors.set(friendlyId, existing);
-            } else {
-                // New sensor discovered via OBD
-                this.sensors.set(real.id, real);
-            }
-        });
-        this.notifyListeners();
     });
   }
 
