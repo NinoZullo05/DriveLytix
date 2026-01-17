@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Platform,
@@ -37,10 +37,10 @@ const SettingsScreen = ({ navigation }: any) => {
   const currentTheme = isDark ? theme.palette.dark : theme.palette.light;
 
   const [vehicleData, setVehicleData] = useState({
-    make: "Ford",
-    model: "Mustang GT",
-    year: "2022",
-    engine: "5.0L V8",
+    make: "",
+    model: "",
+    year: "",
+    engine: "",
   });
 
   const [settings, setSettings] = useState({
@@ -56,18 +56,10 @@ const SettingsScreen = ({ navigation }: any) => {
     temperature: "°C",
   });
 
-  // Auto-save logic (mock)
-  useEffect(() => {
-    console.log("Auto-saving vehicle data:", vehicleData);
-  }, [vehicleData]);
-
-  useEffect(() => {
-    console.log("Auto-saving settings:", settings);
-  }, [settings]);
-
-  useEffect(() => {
-    console.log("Auto-saving units:", units);
-  }, [units]);
+  // Auto-save logic (Placeholder for SettingsService integration)
+  // useEffect(() => {
+  //   saveVehicleData(vehicleData);
+  // }, [vehicleData]);
 
   const SettingSwitch = ({
     value,

@@ -11,7 +11,14 @@
 node_modules/
 npm-debug.log
 yarn-error.log
-package-lock.json
+
+# Build Artifacts
+android_old/
+.vscode/
+dist/
+web-build/
+*.apk
+*.aab
 
 # Debug
 npm-debug.log*

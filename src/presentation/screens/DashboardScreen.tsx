@@ -46,8 +46,8 @@ const AlertCard = ({ title, value, status, icon, onPress }: any) => {
     status === "danger"
       ? "#F87171"
       : status === "warning"
-      ? "#FB923C"
-      : "#4ADE80";
+        ? "#FB923C"
+        : "#4ADE80";
 
   return (
     <TouchableOpacity
@@ -81,7 +81,7 @@ const DashboardScreen = () => {
     const unsubscribe = bluetoothService.subscribeToConnectionStatus(
       (status) => {
         setIsConnected(status);
-      }
+      },
     );
     return unsubscribe;
   }, []);
@@ -165,8 +165,12 @@ const DashboardScreen = () => {
                 <Text style={styles.liveText}>LIVE</Text>
               </View>
             </View>
-            <Text style={styles.vehicleModel}>Ford Mustang GT</Text>
-            <Text style={styles.vehicleVin}>VIN: 1FA6P8CF5H5XXXXXX</Text>
+            <Text style={styles.vehicleModel}>
+              {isConnected ? "Connected Vehicle" : t("home.vehicleStatusLabel")}
+            </Text>
+            <Text style={styles.vehicleVin}>
+              {isConnected ? "Reading VIN..." : "No Vehicle Protected"}
+            </Text>
           </View>
           <MaterialCommunityIcons
             name="chevron-right"
@@ -189,22 +193,22 @@ const DashboardScreen = () => {
         <View style={styles.alertsContainer}>
           <AlertCard
             title={t("home.coolant")}
-            value="92°C"
+            value="--"
             status="normal"
             icon="thermometer"
             onPress={() => router.push("/data")}
           />
           <AlertCard
             title={t("home.fuelLevel")}
-            value="15%"
-            status="warning"
+            value="--"
+            status="normal" // Changed from warning to normal for default
             icon="fuel"
             onPress={() => router.push("/data")}
           />
           <AlertCard
             title={t("home.battery")}
-            value="11.8V"
-            status="danger"
+            value="--"
+            status="normal" // Changed from danger
             icon="flash"
             onPress={() => router.push("/data")}
           />
