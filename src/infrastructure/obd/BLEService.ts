@@ -1,22 +1,30 @@
+import { Buffer } from "buffer";
 import { PermissionsAndroid, Platform } from "react-native";
-import { BleManager, Characteristic, Device } from "react-native-ble-plx";
+import {
+    BleManager,
+    Characteristic,
+    Device
+} from "react-native-ble-plx";
 import { ConnectionState } from "../../domain/enums/ConnectionState";
 import { IOBDAdapter, OBDDevice } from "../../domain/interfaces/IOBDAdapter";
+import { ELM327Protocol } from "./ELM327Protocol";
 
 const SERVICE_UUIDS = ["FFF0", "18F0", "E7810A71-73AE-499D-8C15-FAA9AEF0C3F2"]; // Common OBD Service UUIDs
-const NOTIFY_UUIDS = ["FFF1", "2AF1", "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F"];
-const WRITE_UUIDS = ["FFF2", "2AF0", "BEF8D6C9-9C21-4C9E-B632-BD58C1009F9F"];
 
 export class BLEService implements IOBDAdapter {
   private manager: BleManager;
   private device: Device | null = null;
   private writeCharacteristic: Characteristic | null = null;
+  private notifyCharacteristic: Characteristic | null = null;
   private connectionState: ConnectionState = ConnectionState.DISCONNECTED;
   private stateListeners: ((state: ConnectionState) => void)[] = [];
 
   // Buffer to hold incoming chunks of data
   private dataBuffer: string = "";
-  private onDataCallback: ((data: string) => void) | null = null;
+  private commandPromise: {
+    resolve: (val: string) => void;
+    reject: (err: any) => void;
+  } | null = null;
 
   constructor() {
     this.manager = new BleManager();
@@ -33,29 +41,33 @@ export class BLEService implements IOBDAdapter {
 
   onStateChange(callback: (state: ConnectionState) => void): void {
     this.stateListeners.push(callback);
-  }
-
-  setOnDataReceived(callback: (data: string) => void) {
-    this.onDataCallback = callback;
+    callback(this.connectionState);
   }
 
   async requestPermissions(): Promise<boolean> {
     if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.requestMultiple([
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-      ]);
-      return (
-        granted[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
-        granted[PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN] ===
-          PermissionsAndroid.RESULTS.GRANTED &&
-        granted[PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT] ===
-          PermissionsAndroid.RESULTS.GRANTED
-      );
+      if (Platform.Version >= 31) {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        ]);
+        return (
+          granted["android.permission.BLUETOOTH_SCAN"] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted["android.permission.BLUETOOTH_CONNECT"] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          granted["android.permission.ACCESS_FINE_LOCATION"] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        );
+      } else {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      }
     }
-    return true; // iOS permissions handled by Info.plist
+    return true;
   }
 
   async scanDevices(): Promise<OBDDevice[]> {
@@ -69,39 +81,30 @@ export class BLEService implements IOBDAdapter {
     const devices = new Map<string, OBDDevice>();
 
     return new Promise((resolve) => {
-      // Scan for 5 seconds
-      const subscription = this.manager.startDeviceScan(
-        null,
-        null,
+      this.manager.startDeviceScan(
+        null, // Consider filtering by SERVICE_UUIDS if performance is an issue
+        { allowDuplicates: false },
         (error, device) => {
           if (error) {
-            if (error.errorCode === 601) {
-              // LocationServicesDisabled
-              console.error(
-                "Location services are disabled. Please enable GPS.",
-              );
-            } else {
-              console.error("Scan error:", error);
-            }
+            console.error("Scan error:", error);
             this.setState(ConnectionState.ERROR);
-            // subscription.remove(); // Not needed as stopDeviceScan cleans up, but good practice if available
             this.manager.stopDeviceScan();
-            resolve([]);
+            resolve(Array.from(devices.values()));
             return;
           }
 
-          // Filter for devices that look like OBD adapters
-          if (
-            device &&
-            device.name &&
-            (device.name.includes("OBD") ||
-              device.name.includes("Vlink") ||
-              device.name.includes("ELM"))
-          ) {
-            if (!devices.has(device.id)) {
+          if (device) {
+            const name = device.name || device.localName || "Unknown Device";
+            // Filter common OBD names or just collect all and let user decide
+            if (
+              name.toUpperCase().includes("OBD") ||
+              name.toUpperCase().includes("V-LINK") ||
+              name.toUpperCase().includes("ELM") ||
+              name.toUpperCase().includes("IOS-VLINK")
+            ) {
               devices.set(device.id, {
                 id: device.id,
-                name: device.name,
+                name: name,
                 address: device.id,
                 protocol: "BLE",
                 rssi: device.rssi ?? -100,
@@ -113,31 +116,84 @@ export class BLEService implements IOBDAdapter {
 
       setTimeout(() => {
         this.manager.stopDeviceScan();
-        this.setState(ConnectionState.DISCONNECTED);
+        if (this.connectionState === ConnectionState.SCANNING) {
+          this.setState(ConnectionState.DISCONNECTED);
+        }
         resolve(Array.from(devices.values()));
-      }, 5000);
+      }, 8000);
     });
   }
 
   async connect(deviceId: string): Promise<void> {
     this.setState(ConnectionState.CONNECTING);
     try {
-      this.device = await this.manager.connectToDevice(deviceId);
+      this.device = await this.manager.connectToDevice(deviceId, {
+        autoConnect: false,
+      });
       await this.device.discoverAllServicesAndCharacteristics();
 
-      // Find Write and Notify characteristics
-      // In a real robust app, we'd iterate services. For now, we try to find known characteristics.
-      // This part often requires specific knowledge of the dongle or iterating content.
-      // Simplifying for this architecture step:
+      const services = await this.device.services();
+      let foundNotify = false;
+      let foundWrite = false;
+
+      for (const service of services) {
+        const characteristics = await service.characteristics();
+        for (const char of characteristics) {
+          if (char.isWritableWithResponse || char.isWritableWithoutResponse) {
+            this.writeCharacteristic = char;
+            foundWrite = true;
+          }
+          if (char.isNotifiable || char.isIndicatable) {
+            this.notifyCharacteristic = char;
+            foundNotify = true;
+
+            // Start monitoring
+            char.monitor((error, c) => {
+              if (error) {
+                console.error("Monitor error:", error);
+                return;
+              }
+              if (c?.value) {
+                const decoded = Buffer.from(c.value, "base64").toString(
+                  "ascii",
+                );
+                this.handleDataReceived(decoded);
+              }
+            });
+          }
+        }
+        if (foundNotify && foundWrite) break;
+      }
+
+      if (!foundNotify || !foundWrite) {
+        throw new Error("Could not find OBD communication characteristics.");
+      }
 
       this.setState(ConnectionState.CONNECTED);
 
-      // Fake implementation of characteristic finding for now to allow compiling
-      // In reality, we need to iterate device.services()
+      this.device.onDisconnected((error, d) => {
+        console.log("Device disconnected", d.id);
+        this.setState(ConnectionState.DISCONNECTED);
+        this.device = null;
+        this.writeCharacteristic = null;
+        this.notifyCharacteristic = null;
+      });
     } catch (error) {
       console.error("Connection failed", error);
       this.setState(ConnectionState.ERROR);
       throw error;
+    }
+  }
+
+  private handleDataReceived(data: string) {
+    this.dataBuffer += data;
+    if (ELM327Protocol.isCompleteResponse(this.dataBuffer)) {
+      const response = ELM327Protocol.cleanResponse(this.dataBuffer);
+      this.dataBuffer = "";
+      if (this.commandPromise) {
+        this.commandPromise.resolve(response);
+        this.commandPromise = null;
+      }
     }
   }
 
@@ -150,19 +206,36 @@ export class BLEService implements IOBDAdapter {
   }
 
   async sendCommand(command: string): Promise<string> {
-    if (
-      !this.device ||
-      (this.connectionState !== ConnectionState.CONNECTED &&
-        this.connectionState !== ConnectionState.READY &&
-        this.connectionState !== ConnectionState.STREAMING)
-    ) {
-      throw new Error("Device not connected");
+    if (!this.writeCharacteristic) {
+      throw new Error("Device not connected or write characteristic not found");
     }
-    // Write logic
-    // const base64 = btoa(command + '\r');
-    // await this.writeCharacteristic.writeWithResponse(base64);
 
-    // For now, return mock response or implement real write later
-    return "OK";
+    return new Promise((resolve, reject) => {
+      // Enforce timeout for command response
+      const timeout = setTimeout(() => {
+        if (this.commandPromise) {
+          this.commandPromise = null;
+          reject(new Error(`Command ${command} timed out`));
+        }
+      }, 5000);
+
+      this.commandPromise = {
+        resolve: (val) => {
+          clearTimeout(timeout);
+          resolve(val);
+        },
+        reject: (err) => {
+          clearTimeout(timeout);
+          reject(err);
+        },
+      };
+
+      const base64 = Buffer.from(command + "\r").toString("base64");
+      this.writeCharacteristic!.writeWithResponse(base64).catch((err) => {
+        this.commandPromise = null;
+        clearTimeout(timeout);
+        reject(err);
+      });
+    });
   }
 }
