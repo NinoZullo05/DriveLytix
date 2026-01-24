@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -20,83 +20,90 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${isScrolled ? "w-[95%] lg:w-[1200px] mt-0" : "w-full mt-4"}`}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 border-b ${isScrolled ? "bg-black/60 backdrop-blur-xl border-white/5 py-3" : "bg-transparent border-transparent py-6"}`}
     >
-      <div
-        className={`glass mx-2 px-6 py-4 flex items-center justify-between ${isScrolled ? "shadow-2xl" : "border-transparent bg-transparent"}`}
-        style={{
-          backgroundColor: isScrolled ? "rgba(10, 12, 16, 0.8)" : "transparent",
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-bold text-white text-xl">
-            D
+      <div className="container mx-auto px-6 flex items-center justify-between">
+        <div className="flex items-center gap-3 group cursor-pointer">
+          <div className="w-8 h-8 bg-gradient-to-tr from-accent-blue to-accent-cyan rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+            <span className="text-white font-black text-sm">D</span>
           </div>
-          <span className="font-bold text-2xl tracking-tighter">
+          <span className="font-bold text-xl tracking-tight text-white">
             DriveLytix
           </span>
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-8">
-          <a href="#features" className="hover:text-cyan-400 transition-colors">
+        <div className="hidden md:flex items-center gap-10">
+          <a href="#features" className="nav-link">
             {t("nav.features")}
           </a>
-          <a
-            href="#architecture"
-            className="hover:text-cyan-400 transition-colors"
-          >
+          <a href="#architecture" className="nav-link">
             {t("nav.architecture")}
           </a>
-          <a href="#demo" className="hover:text-cyan-400 transition-colors">
+          <a href="#demo" className="nav-link">
             {t("nav.demo")}
           </a>
 
+          <div className="h-4 w-[1px] bg-white/10" />
+
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 hover:border-cyan-400/50 transition-all"
+            className="flex items-center gap-2 text-[12px] font-bold text-white/40 hover:text-white transition-colors"
           >
-            <Globe size={18} />
-            <span className="uppercase text-sm font-medium">
-              {i18n.language}
-            </span>
+            <Globe size={14} />
+            <span className="uppercase">{i18n.language}</span>
           </button>
 
-          <button className="btn btn-primary">{t("nav.get_started")}</button>
+          <button className="btn btn-primary px-5 py-2 text-xs font-bold uppercase tracking-wider">
+            {t("nav.get_started")}
+          </button>
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Toggle */}
         <button
-          className="md:hidden p-2"
+          className="md:hidden text-white"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-24 z-40 p-4">
-          <div className="glass p-8 flex flex-col gap-6 items-center bg-[#0a0c10]/95">
-            <a href="#features" onClick={() => setIsMenuOpen(false)}>
-              {t("nav.features")}
-            </a>
-            <a href="#architecture" onClick={() => setIsMenuOpen(false)}>
-              {t("nav.architecture")}
-            </a>
-            <a href="#demo" onClick={() => setIsMenuOpen(false)}>
-              {t("nav.demo")}
-            </a>
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 uppercase font-bold"
-            >
-              <Globe size={20} /> {i18n.language}
-            </button>
-            <button className="btn btn-primary w-full">
-              {t("nav.get_started")}
-            </button>
-          </div>
+        <div className="md:hidden absolute top-0 left-0 w-full h-screen bg-[#030508] p-8 flex flex-col pt-24 gap-8">
+          <a
+            href="#features"
+            className="text-2xl font-bold border-b border-white/5 pb-4"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("nav.features")}
+          </a>
+          <a
+            href="#architecture"
+            className="text-2xl font-bold border-b border-white/5 pb-4"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("nav.architecture")}
+          </a>
+          <a
+            href="#demo"
+            className="text-2xl font-bold border-b border-white/5 pb-4"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("nav.demo")}
+          </a>
+
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-4 text-xl font-bold uppercase mt-4"
+          >
+            <Globe size={24} />{" "}
+            {i18n.language === "en" ? "Italiano" : "English"}
+          </button>
+
+          <button className="btn btn-primary w-full text-lg py-4 mt-auto">
+            {t("nav.get_started")}
+          </button>
         </div>
       )}
     </nav>

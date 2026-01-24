@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, CheckCircle2, Play } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,93 +7,96 @@ const Hero: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="relative min-h-[90vh] flex items-center pt-32 overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent-blue/20 blur-[120px] rounded-full z-0" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-cyan/10 blur-[100px] rounded-full z-0" />
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[radial-gradient(circle_at_50%_50%,_rgba(37,99,235,0.05)_0%,_transparent_50%)]">
+      {/* Background Accents */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-blue/5 blur-[120px] rounded-full -mr-48 -mt-48" />
 
-      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center relative z-10">
+      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-blue/10 border border-accent-blue/20 mb-6 group cursor-default">
-            <span className="w-2 h-2 rounded-full bg-accent-blue animate-pulse" />
-            <span className="text-sm font-semibold text-accent-blue tracking-wide uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-accent-cyan animate-pulse" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/50">
               {t("hero.badge")}
             </span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-8">
-            <span className="block">{t("hero.title_part1")}</span>
-            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-accent-blue to-accent-cyan italic">
-              {t("hero.title_part2")}
-            </span>
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-8 tracking-tight">
+            <span className="text-white">{t("hero.title_part1")}</span>
+            <br />
+            <span className="text-accent-cyan">{t("hero.title_part2")}</span>
           </h1>
 
-          <p className="text-xl text-white/70 max-w-lg mb-10 leading-relaxed">
+          <p className="text-lg text-white/50 max-w-lg mb-12 leading-relaxed font-medium">
             {t("hero.subtitle")}
           </p>
 
-          <div className="flex flex-wrap gap-4">
-            <button className="btn btn-primary group">
+          <div className="flex flex-wrap gap-5">
+            <button className="btn btn-primary px-8 group">
               {t("hero.cta_discover")}
-              <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </button>
-            <button className="btn btn-secondary">
-              <Play size={18} fill="currentColor" />
+            <button className="btn btn-secondary px-8">
+              <Play size={14} fill="white" />
               {t("hero.cta_demo")}
             </button>
           </div>
 
-          <div className="mt-12 flex items-center gap-4">
-            <div className="flex -space-x-4">
-              {[1, 2, 3].map((i) => (
+          <div className="mt-16 flex items-center gap-6 border-t border-white/5 pt-8">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-10 h-10 rounded-full border-2 border-background-primary bg-background-accent"
+                  className="w-9 h-9 rounded-full border-2 border-background-primary bg-background-accent"
                 />
               ))}
             </div>
-            <p className="text-sm text-white/50 font-medium">
-              <span className="text-white font-bold">
-                {t("hero.trusted").split(" ")[0]}
-              </span>{" "}
-              {t("hero.trusted").split(" ").slice(1).join(" ")}
-            </p>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 size={12} className="text-accent-green" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Trusted Solution
+                </span>
+              </div>
+              <p className="text-[11px] text-white/30 font-medium">
+                {t("hero.trusted")}
+              </p>
+            </div>
           </div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="relative"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative lg:ml-auto"
         >
-          <div className="absolute inset-0 bg-accent-cyan/20 blur-[100px] rounded-full z-0 animate-pulse" />
+          <div className="absolute -inset-4 bg-accent-blue/20 blur-[100px] rounded-full z-0 opacity-50" />
           <img
             src="/assets/hero_mockup.png"
-            alt="DriveLytix App Mockup"
-            className="relative z-10 w-full max-w-[500px] mx-auto drop-shadow-2xl"
+            alt="App Mockup"
+            className="relative z-10 w-full max-w-[480px] drop-shadow-[0_32px_64px_rgba(0,0,0,0.5)]"
           />
 
-          {/* Floating Data Card Overlay */}
+          {/* Floating Minimal Data Card */}
           <motion.div
-            animate={{ y: [0, -20, 0] }}
+            animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-10 right-0 glass p-4 rounded-2xl shadow-xl z-20 hidden md:block"
+            className="absolute -right-8 top-1/4 glass p-5 rounded-2xl shadow-2xl z-20 border-white/10 hidden md:block"
           >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-accent-green/20 rounded-lg text-accent-green">
-                <div className="w-5 h-5 bg-accent-green rounded-full blur-[4px] absolute animate-ping" />
-                <div className="w-3 h-3 bg-accent-green rounded-full relative" />
-              </div>
-              <div>
-                <p className="text-[10px] text-white/50 uppercase font-black">
-                  Velocity
-                </p>
-                <p className="text-lg font-bold">124 km/h</p>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                Performance
+              </span>
+              <span className="text-2xl font-black text-white">98%</span>
+              <div className="w-16 h-1 bg-white/5 rounded-full mt-1 overflow-hidden">
+                <div className="h-full bg-accent-green w-[98%]" />
               </div>
             </div>
           </motion.div>
