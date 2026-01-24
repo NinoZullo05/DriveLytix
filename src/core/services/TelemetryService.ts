@@ -6,26 +6,26 @@ import { useTelemetryStore } from "../store/TelemetryStore";
 import { bluetoothService } from "./BluetoothService";
 
 export class TelemetryService {
-  private pollingInterval: ReturnType<typeof setInterval> | null = null;
+  private pollTimer: ReturnType<typeof setTimeout> | null = null;
+  private isPollingActive: boolean = false;
 
   // Desired PIDs to poll
   private activePIDs: string[] = [
-    "010C",
-    "010D",
-    "0105",
-    "0104",
-    "010F",
-    "0110",
-    "0142",
+    "010C", // RPM
+    "010D", // Speed
+    "0105", // Engine Coolant Temp
+    "0104", // Calculated Engine Load
+    "010F", // Intake Air Temp
+    "0110", // MAF Air Flow Rate
+    "0142", // Control Module Voltage
   ];
 
   constructor() {
-    // Initial adapter setup is managed by BluetoothService
     this.getAdapter().onStateChange(this.handleStateChange.bind(this));
   }
 
   private handleStateChange(state: ConnectionState) {
-    console.log(`[TelemetryService] State: ${state}`);
+    console.log(`[TelemetryService] State Changed: ${state}`);
     useTelemetryStore.getState().setConnectionState(state);
 
     if (state === ConnectionState.CONNECTED) {
@@ -59,68 +59,86 @@ export class TelemetryService {
         .setConnectionState(ConnectionState.INITIALIZING);
       const adapter = this.getAdapter();
 
-      // Run initialization sequence
+      console.log("[TelemetryService] Initializing OBD Adapter...");
       for (const cmd of ELM327_INIT_COMMANDS) {
+        console.log(`[TelemetryService] Sending init command: ${cmd}`);
         await adapter.sendCommand(cmd);
       }
 
-      // If successful, start polling
       useTelemetryStore
         .getState()
         .setConnectionState(ConnectionState.STREAMING);
+
+      console.log("[TelemetryService] Adapter Ready. Starting Polling...");
       this.startPolling();
     } catch (error) {
-      console.error("Initialization failed", error);
+      console.error("[TelemetryService] Initialization failed:", error);
       await this.disconnect();
     }
   }
 
   private startPolling() {
-    if (this.pollingInterval) return;
+    if (this.isPollingActive) return;
+    this.isPollingActive = true;
+    this.poll();
+  }
 
-    this.pollingInterval = setInterval(async () => {
-      const adapter = this.getAdapter();
-      const state = adapter.getState();
+  private async poll() {
+    if (!this.isPollingActive) return;
 
-      if (
-        state !== ConnectionState.CONNECTED &&
-        state !== ConnectionState.STREAMING
-      ) {
-        this.stopPolling();
-        return;
-      }
+    const adapter = this.getAdapter();
+    const state = adapter.getState();
 
-      const updates: any[] = [];
+    if (
+      state !== ConnectionState.CONNECTED &&
+      state !== ConnectionState.STREAMING
+    ) {
+      console.log(`[TelemetryService] Polling stopped due to state: ${state}`);
+      this.stopPolling();
+      return;
+    }
 
-      for (const pid of this.activePIDs) {
-        try {
-          const rawResponse = await adapter.sendCommand(pid);
-          const value = decodePID(pid, rawResponse);
+    const updates: any[] = [];
+    const timestamp = Date.now();
 
-          if (value !== null) {
-            const unit = PID_MAP[pid]?.unit || "";
-            updates.push({
-              timestamp: Date.now(),
-              pid: pid,
-              value: value,
-              unit: unit,
-            });
-          }
-        } catch (e) {
-          // PID read failed, skip quietly or log
+    for (const pid of this.activePIDs) {
+      if (!this.isPollingActive) break;
+
+      try {
+        const rawResponse = await adapter.sendCommand(pid);
+        const value = decodePID(pid, rawResponse);
+
+        if (value !== null) {
+          const unit = PID_MAP[pid]?.unit || "";
+          updates.push({
+            timestamp: timestamp,
+            pid: pid,
+            value: value,
+            unit: unit,
+          });
         }
+      } catch (e) {
+        console.warn(`[TelemetryService] Failed to poll PID ${pid}:`, e);
+        // If we get consecutive failures, we might want to check connection
       }
+    }
 
-      if (updates.length > 0) {
-        useTelemetryStore.getState().updateTelemetry(updates);
-      }
-    }, 250); // 4Hz
+    if (updates.length > 0) {
+      useTelemetryStore.getState().updateTelemetry(updates);
+    }
+
+    // Schedule next poll only after this one is complete
+    if (this.isPollingActive) {
+      this.pollTimer = setTimeout(() => this.poll(), 100); // Poll at ~10Hz if possible, or as fast as hardware allows
+    }
   }
 
   private stopPolling() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
+    console.log("[TelemetryService] Stopping Polling...");
+    this.isPollingActive = false;
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
     }
   }
 

@@ -1,10 +1,6 @@
 import { Buffer } from "buffer";
 import { PermissionsAndroid, Platform } from "react-native";
-import {
-    BleManager,
-    Characteristic,
-    Device
-} from "react-native-ble-plx";
+import { BleManager, Characteristic, Device } from "react-native-ble-plx";
 import { ConnectionState } from "../../domain/enums/ConnectionState";
 import { IOBDAdapter, OBDDevice } from "../../domain/interfaces/IOBDAdapter";
 import { ELM327Protocol } from "./ELM327Protocol";
@@ -19,11 +15,23 @@ export class BLEService implements IOBDAdapter {
   private connectionState: ConnectionState = ConnectionState.DISCONNECTED;
   private stateListeners: ((state: ConnectionState) => void)[] = [];
 
+  // Command Queue
+  private queue: {
+    command: string;
+    resolve: (val: string) => void;
+    reject: (err: any) => void;
+    timeout: number;
+    timestamp: number;
+  }[] = [];
+  private isProcessing: boolean = false;
+  private currentCommand: string | null = null;
+
   // Buffer to hold incoming chunks of data
   private dataBuffer: string = "";
   private commandPromise: {
     resolve: (val: string) => void;
     reject: (err: any) => void;
+    timer: ReturnType<typeof setTimeout>;
   } | null = null;
 
   constructor() {
@@ -82,7 +90,7 @@ export class BLEService implements IOBDAdapter {
 
     return new Promise((resolve) => {
       this.manager.startDeviceScan(
-        null, // Consider filtering by SERVICE_UUIDS if performance is an issue
+        null,
         { allowDuplicates: false },
         (error, device) => {
           if (error) {
@@ -95,7 +103,6 @@ export class BLEService implements IOBDAdapter {
 
           if (device) {
             const name = device.name || device.localName || "Unknown Device";
-            // Filter common OBD names or just collect all and let user decide
             if (
               name.toUpperCase().includes("OBD") ||
               name.toUpperCase().includes("V-LINK") ||
@@ -147,10 +154,10 @@ export class BLEService implements IOBDAdapter {
             this.notifyCharacteristic = char;
             foundNotify = true;
 
-            // Start monitoring
             char.monitor((error, c) => {
               if (error) {
                 console.error("Monitor error:", error);
+                // Handle disconnection if error is severe
                 return;
               }
               if (c?.value) {
@@ -173,10 +180,8 @@ export class BLEService implements IOBDAdapter {
 
       this.device.onDisconnected((error, d) => {
         console.log("Device disconnected", d.id);
+        this.handleCleanup();
         this.setState(ConnectionState.DISCONNECTED);
-        this.device = null;
-        this.writeCharacteristic = null;
-        this.notifyCharacteristic = null;
       });
     } catch (error) {
       console.error("Connection failed", error);
@@ -185,57 +190,116 @@ export class BLEService implements IOBDAdapter {
     }
   }
 
+  private handleCleanup() {
+    this.device = null;
+    this.writeCharacteristic = null;
+    this.notifyCharacteristic = null;
+    this.dataBuffer = "";
+    this.isProcessing = false;
+    this.currentCommand = null;
+
+    // Reject all pending commands
+    if (this.commandPromise) {
+      clearTimeout(this.commandPromise.timer);
+      this.commandPromise.reject(new Error("Device disconnected"));
+      this.commandPromise = null;
+    }
+
+    this.queue.forEach((item) => item.reject(new Error("Device disconnected")));
+    this.queue = [];
+  }
+
   private handleDataReceived(data: string) {
     this.dataBuffer += data;
+    console.log(
+      `[BLE] Received chunk: ${JSON.stringify(data)}, Buffer: ${JSON.stringify(this.dataBuffer)}`,
+    );
+
     if (ELM327Protocol.isCompleteResponse(this.dataBuffer)) {
       const response = ELM327Protocol.cleanResponse(this.dataBuffer);
       this.dataBuffer = "";
+
       if (this.commandPromise) {
-        this.commandPromise.resolve(response);
+        console.log(`[BLE] Resolving ${this.currentCommand} with: ${response}`);
+        const { resolve, timer } = this.commandPromise;
+        clearTimeout(timer);
         this.commandPromise = null;
+        resolve(response);
       }
     }
   }
 
   async disconnect(): Promise<void> {
     if (this.device) {
-      await this.device.cancelConnection();
-      this.device = null;
+      try {
+        await this.device.cancelConnection();
+      } catch (e) {
+        console.error("Disconnect error:", e);
+      }
     }
+    this.handleCleanup();
     this.setState(ConnectionState.DISCONNECTED);
   }
 
-  async sendCommand(command: string): Promise<string> {
+  async sendCommand(
+    command: string,
+    timeoutMs: number = 5000,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.queue.push({
+        command,
+        resolve,
+        reject,
+        timeout: timeoutMs,
+        timestamp: Date.now(),
+      });
+      this.processQueue();
+    });
+  }
+
+  private async processQueue() {
+    if (this.isProcessing || this.queue.length === 0) return;
     if (!this.writeCharacteristic) {
-      throw new Error("Device not connected or write characteristic not found");
+      const item = this.queue.shift();
+      item?.reject(new Error("Device not connected"));
+      return;
     }
 
-    return new Promise((resolve, reject) => {
-      // Enforce timeout for command response
-      const timeout = setTimeout(() => {
-        if (this.commandPromise) {
+    this.isProcessing = true;
+    const { command, resolve, reject, timeout } = this.queue.shift()!;
+    this.currentCommand = command;
+
+    try {
+      await new Promise<string>((res, rej) => {
+        const timer = setTimeout(() => {
+          if (this.commandPromise) {
+            console.warn(
+              `[BLE] Command ${command} timed out after ${timeout}ms`,
+            );
+            this.commandPromise = null;
+            this.dataBuffer = ""; // Clear buffer on timeout
+            rej(new Error(`Command ${command} timed out`));
+          }
+        }, timeout);
+
+        this.commandPromise = { resolve: res, reject: rej, timer };
+
+        const base64 = Buffer.from(command + "\r").toString("base64");
+        this.writeCharacteristic!.writeWithResponse(base64).catch((err) => {
+          clearTimeout(timer);
           this.commandPromise = null;
-          reject(new Error(`Command ${command} timed out`));
-        }
-      }, 5000);
-
-      this.commandPromise = {
-        resolve: (val) => {
-          clearTimeout(timeout);
-          resolve(val);
-        },
-        reject: (err) => {
-          clearTimeout(timeout);
-          reject(err);
-        },
-      };
-
-      const base64 = Buffer.from(command + "\r").toString("base64");
-      this.writeCharacteristic!.writeWithResponse(base64).catch((err) => {
-        this.commandPromise = null;
-        clearTimeout(timeout);
-        reject(err);
-      });
-    });
+          rej(err);
+        });
+      })
+        .then(resolve)
+        .catch(reject);
+    } catch (error) {
+      console.error(`[BLE] Error processing command ${command}:`, error);
+    } finally {
+      this.isProcessing = false;
+      this.currentCommand = null;
+      // Process next item in queue
+      setTimeout(() => this.processQueue(), 10);
+    }
   }
 }
