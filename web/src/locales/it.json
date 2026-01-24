@@ -1,0 +1,54 @@
+{
+  "nav": {
+    "features": "Funzionalità",
+    "architecture": "Architettura",
+    "demo": "Demo Live",
+    "get_started": "Inizia Ora"
+  },
+  "hero": {
+    "badge": "Analisi Veicoli Next-Gen",
+    "title_part1": "DriveLytix:",
+    "title_part2": "Il Tuo Veicolo, Decodificato",
+    "subtitle": "Analizza le prestazioni del tuo veicolo in tempo reale con la telemetria guidata dall'IA. Estrazione dati ad alta precisione a portata di mano.",
+    "cta_discover": "Scopri di più",
+    "cta_demo": "Guarda la Demo",
+    "trusted": "Oltre 5.000 driver si fidano di noi"
+  },
+  "features": {
+    "title": "Analisi Chiave",
+    "subtitle": "Sblocca approfondimenti sulle prestazioni del tuo veicolo con visualizzazioni dati di livello professionale.",
+    "telemetry": {
+      "title": "Telemetria in Tempo Reale",
+      "desc": "Streaming di dati in diretta dalla porta OBD direttamente alla tua dashboard con latenza zero."
+    },
+    "maintenance": {
+      "title": "Manutenzione Predittiva",
+      "desc": "Approfondimenti basati su IA per prevenire guasti meccanici prima che accadano, risparmiando tempo e costi."
+    },
+    "eco": {
+      "title": "Punteggio Eco-Driving",
+      "desc": "Ottimizza il consumo di carburante e riduci l'impronta di carbonio con un coaching intelligente in tempo reale."
+    }
+  },
+  "architecture": {
+    "title": "Architettura Tecnica",
+    "subtitle": "Il nostro stack multi-livello garantisce l'integrità dei dati e l'alta disponibilità dalla porta del veicolo alla dashboard dell'utente finale.",
+    "layers": {
+      "presentation": "Livello Interfaccia Unificata",
+      "presentation_desc": "Dashboard basata su React, client mobili iOS e Android.",
+      "logic": "Elaborazione Application & Edge",
+      "logic_desc": "Normalizzazione dei dati in tempo reale e filtraggio locale per un feedback immediato.",
+      "connectivity": "Handler Protocollo BLE 5.0 / OBD-II",
+      "connectivity_desc": "Canale di trasmissione crittografato tra l'hardware del veicolo e il dispositivo gateway.",
+      "storage": "Backend di Persistenza Cloud",
+      "storage_desc": "Infrastruttura AWS scalabile che utilizza database Time-series per query rapide."
+    }
+  },
+  "demo": {
+    "title": "Sperimenta l'Intelligenza in Tempo Reale",
+    "subtitle": "Interagisci con i flussi del veicolo in tempo reale e guarda come DriveLytix elabora i dati di telemetria ad alta frequenza con latenza di millisecondi.",
+    "simulation": "Simulazione Live",
+    "history": "Cronologia",
+    "export": "Esporta Log (.CSV)"
+  }
+}

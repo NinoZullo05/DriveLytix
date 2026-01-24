@@ -1,0 +1,54 @@
+{
+  "nav": {
+    "features": "Features",
+    "architecture": "Architecture",
+    "demo": "Live Demo",
+    "get_started": "Get Started"
+  },
+  "hero": {
+    "badge": "Next-Gen Vehicle Analytics",
+    "title_part1": "DriveLytix:",
+    "title_part2": "Your Vehicle, Decoded",
+    "subtitle": "Analyze your vehicle's performance in real-time with AI-driven telemetry. High-precision data extraction at your fingertips.",
+    "cta_discover": "Discover More",
+    "cta_demo": "View Demo",
+    "trusted": "5,000+ Drivers trusted worldwide"
+  },
+  "features": {
+    "title": "Key Analytics",
+    "subtitle": "Unlock deeper insights into your vehicle's performance with professional-grade data visualization.",
+    "telemetry": {
+      "title": "Real-time Telemetry",
+      "desc": "Live data streaming from your OBD port directly to your dashboard with zero latency."
+    },
+    "maintenance": {
+      "title": "Predictive Maintenance",
+      "desc": "AI-driven insights to prevent mechanical failures before they happen, saving you time and cost."
+    },
+    "eco": {
+      "title": "Eco-Driving Score",
+      "desc": "Optimize fuel consumption and reduce your carbon footprint with smart real-time coaching."
+    }
+  },
+  "architecture": {
+    "title": "Technical Architecture",
+    "subtitle": "Our multi-layered stack ensures data integrity and high availability from the vehicle port to the end-user dashboard.",
+    "layers": {
+      "presentation": "Unified Interface Layer",
+      "presentation_desc": "React-based Dashboard, iOS & Android Mobile Clients.",
+      "logic": "Application & Edge Processing",
+      "logic_desc": "Real-time data normalization and local filtering for immediate feedback.",
+      "connectivity": "BLE 5.0 / OBD-II Protocol Handler",
+      "connectivity_desc": "Encrypted transmission channel between vehicle hardware and gateway device.",
+      "storage": "Cloud Persistence Backend",
+      "storage_desc": "Scalable AWS infrastructure utilizing Time-series databases for rapid querying."
+    }
+  },
+  "demo": {
+    "title": "Experience Real-Time Intelligence",
+    "subtitle": "Interact with live vehicle streams and see how DriveLytix processes high-frequency telemetry data with millisecond latency.",
+    "simulation": "Live Simulation",
+    "history": "History",
+    "export": "Export Log (.CSV)"
+  }
+}
