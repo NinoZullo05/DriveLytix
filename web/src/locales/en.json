@@ -28,6 +28,18 @@
     "eco": {
       "title": "Eco-Driving Score",
       "desc": "Optimize fuel consumption and reduce your carbon footprint with smart real-time coaching."
+    },
+    "realtime": {
+      "title": "Real-time Analysis",
+      "desc": "Advanced data processing with millisecond latency for precise vehicle diagnostics."
+    },
+    "connectivity": {
+      "title": "Smart Connectivity",
+      "desc": "Seamless Bluetooth Low Energy integration with robust auto-reconnect logic."
+    },
+    "history": {
+      "title": "Historicals",
+      "desc": "Comprehensive trip history and performance tracking stored safely on your device."
     }
   },
   "architecture": {

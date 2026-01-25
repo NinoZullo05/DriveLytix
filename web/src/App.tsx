@@ -10,15 +10,18 @@ import "./index.css";
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background-primary text-white selection:bg-accent-cyan/30">
-      <Navbar />
-      <main>
-        <Hero />
-        <Features />
-        <Architecture />
-        <LiveDemo />
-      </main>
-      <Footer />
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-blue-100 relative">
+      <div className="fixed inset-0 bg-mesh-light opacity-60 pointer-events-none z-0" />
+      <div className="relative z-10 flex flex-col">
+        <Navbar />
+        <main className="flex-1">
+          <Hero />
+          <Features />
+          <Architecture />
+          <LiveDemo />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 };

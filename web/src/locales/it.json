@@ -28,6 +28,18 @@
     "eco": {
       "title": "Punteggio Eco-Driving",
       "desc": "Ottimizza il consumo di carburante e riduci l'impronta di carbonio con un coaching intelligente in tempo reale."
+    },
+    "realtime": {
+      "title": "Analisi in Tempo Reale",
+      "desc": "Elaborazione dati avanzata con latenza di millisecondi per diagnosi precise del veicolo."
+    },
+    "connectivity": {
+      "title": "Connettività Intelligente",
+      "desc": "Integrazione Bluetooth Low Energy senza soluzione di continuità con logica di riconnessione automatica robusta."
+    },
+    "history": {
+      "title": "Storico Dati",
+      "desc": "Cronologia completa dei viaggi e monitoraggio delle prestazioni memorizzati in sicurezza sul tuo dispositivo."
     }
   },
   "architecture": {

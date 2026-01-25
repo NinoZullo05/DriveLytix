@@ -1,4 +1,13 @@
-import { Cloud, Download, Maximize2, Settings } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  Cloud,
+  Cpu,
+  Download,
+  Gauge,
+  Maximize2,
+  Settings,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -42,199 +51,231 @@ const LiveDemo: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const latest = data[data.length - 1];
+
   return (
-    <section id="demo" className="py-24 bg-background-secondary relative">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-20">
-          <h2 className="section-title mb-4">{t("demo.title")}</h2>
-          <p className="section-subtitle">{t("demo.subtitle")}</p>
+    <section id="demo" className="py-32 bg-slate-50 relative overflow-hidden">
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-3xl mx-auto text-center mb-20">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="section-title mb-6"
+          >
+            {t("demo.title")}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="section-subtitle"
+          >
+            {t("demo.subtitle")}
+          </motion.p>
         </div>
 
-        <div className="glass rounded-[32px] overflow-hidden shadow-2xl border-white/5 bg-[#0d1017]">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden"
+        >
           {/* Dashboard Header */}
-          <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-black/20">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-widest text-white/50">
-                  Live Stream: OBDI-4592-TX
+          <div className="px-10 py-8 border-b border-slate-100 flex flex-wrap items-center justify-between gap-6 bg-slate-50/50">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
+                <span className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-900">
+                  Live Telemetry
                 </span>
               </div>
+              <div className="h-4 w-[1px] bg-slate-200 hidden sm:block" />
               <div className="flex gap-2">
-                <button className="px-4 py-1.5 rounded-lg bg-white/10 text-xs font-bold uppercase">
+                <span className="px-3 py-1 rounded-full bg-blue-600 text-white text-[9px] font-bold uppercase tracking-widest">
                   {t("demo.simulation")}
-                </button>
-                <button className="px-4 py-1.5 rounded-lg text-xs font-bold uppercase text-white/30 hover:text-white transition-colors">
-                  {t("demo.history")}
-                </button>
+                </span>
+                <span className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                  OBDII v2.4
+                </span>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-white/50">
-              <Settings size={20} className="hover:text-white cursor-pointer" />
+            <div className="flex items-center gap-5 text-slate-400">
+              <div className="flex items-center gap-2 group cursor-pointer hover:text-slate-900 transition-colors">
+                <Settings size={18} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">
+                  Config
+                </span>
+              </div>
               <Maximize2
-                size={20}
-                className="hover:text-white cursor-pointer"
+                size={18}
+                className="hover:text-slate-900 cursor-pointer transition-colors"
               />
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-4 min-h-[500px]">
-            {/* Chart Area */}
-            <div className="lg:col-span-3 p-8">
-              <div className="flex justify-between mb-8">
-                <div>
-                  <p className="text-xs uppercase text-white/40 font-bold mb-1">
-                    Engine Output
-                  </p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black">
-                      {Math.floor(data[data.length - 1].rpm).toLocaleString()}
+          <div className="grid lg:grid-cols-4">
+            <div className="lg:col-span-3 p-10">
+              <div className="grid sm:grid-cols-2 gap-10 mb-12">
+                <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Gauge size={16} className="text-blue-600" />
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      Engine Speed
                     </span>
-                    <span className="text-white/40 font-bold">RPM</span>
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-6xl font-black text-slate-950 tabular-nums">
+                      {Math.floor(latest.rpm).toLocaleString()}
+                    </span>
+                    <span className="text-sm font-bold text-blue-600 tracking-widest">
+                      RPM
+                    </span>
+                  </div>
+                  <div className="mt-6 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(latest.rpm / 8000) * 100}%` }}
+                      className="h-full bg-blue-600"
+                    />
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-white/40 font-bold mb-1">
-                    Vehicle Velocity
-                  </p>
-                  <div className="flex items-baseline gap-2 justify-end">
-                    <span className="text-4xl font-black text-accent-cyan">
-                      {Math.floor(data[data.length - 1].velocity)}
+
+                <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Activity size={16} className="text-blue-600" />
+                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                      Velocity
                     </span>
-                    <span className="text-accent-cyan/60 font-bold">MPH</span>
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-6xl font-black text-slate-950 tabular-nums">
+                      {Math.floor(latest.velocity)}
+                    </span>
+                    <span className="text-sm font-bold text-blue-600 tracking-widest">
+                      MPH
+                    </span>
+                  </div>
+                  <div className="mt-6 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(latest.velocity / 120) * 100}%` }}
+                      className="h-full bg-blue-600"
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full mt-8 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm overflow-hidden">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data}>
                     <defs>
                       <linearGradient id="colorRpm" x1="0" y1="0" x2="0" y2="1">
                         <stop
                           offset="5%"
-                          stopColor="#00ff88"
-                          stopOpacity={0.3}
+                          stopColor="#2563eb"
+                          stopOpacity={0.1}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#00ff88"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                      <linearGradient id="colorVel" x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor="#00f2ff"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#00f2ff"
+                          stopColor="#2563eb"
                           stopOpacity={0}
                         />
                       </linearGradient>
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="rgba(255,255,255,0.05)"
+                      stroke="#f1f5f9"
                       vertical={false}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: "#1a1e26",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        backgroundColor: "#ffffff",
+                        border: "1px solid #e2e8f0",
                         borderRadius: "12px",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       }}
-                      itemStyle={{ color: "#fff" }}
                     />
                     <Area
                       type="monotone"
                       dataKey="rpm"
-                      stroke="#00ff88"
+                      stroke="#2563eb"
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorRpm)"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="velocity"
-                      stroke="#00f2ff"
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorVel)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Sidebar Stats */}
-            <div className="border-l border-white/5 bg-black/10 p-8 flex flex-col gap-8">
-              <div>
-                <div className="flex justify-between text-xs font-bold uppercase mb-2">
-                  <span className="text-white/40">Fuel Reserve</span>
-                  <span>64%</span>
-                </div>
-                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-600 rounded-full"
-                    style={{ width: "64%" }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-white/40 font-bold uppercase mb-4">
-                  Diagnostics Console
-                </p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-accent-green/10 border border-accent-green/20">
-                    <div className="w-5 h-5 rounded-full bg-accent-green flex items-center justify-center text-[10px] text-background-primary font-bold">
-                      ✓
-                    </div>
-                    <p className="text-xs">
-                      Oil Pressure Optimal
-                      <br />
-                      <span className="text-[10px] opacity-50">
-                        Stable at 45 PSI
-                      </span>
-                    </p>
+            <div className="border-l border-slate-100 bg-slate-50/30 p-10 flex flex-col gap-10">
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] mb-3">
+                    <span className="text-slate-400">Memory Load</span>
+                    <span className="text-blue-600">1.2 GB</span>
                   </div>
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                    <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold">
-                      !
-                    </div>
-                    <p className="text-xs">
-                      5G Connectivity
-                      <br />
-                      <span className="text-[10px] opacity-50">
-                        Latency: 14ms
-                      </span>
-                    </p>
+                  <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 w-[45%]" />
                   </div>
                 </div>
               </div>
 
-              <button className="mt-auto btn btn-secondary w-full text-xs py-2 bg-white/5">
-                <Download size={14} />
+              <div>
+                <div className="flex items-center gap-2 mb-6">
+                  <Cpu size={14} className="text-slate-400" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    System Modules
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-100 flex items-center justify-between shadow-sm">
+                    <span className="text-xs font-bold text-slate-900">
+                      Bluetooth LE
+                    </span>
+                    <span className="text-[9px] font-black bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase">
+                      Stable
+                    </span>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white border border-slate-100 flex items-center justify-between shadow-sm">
+                    <span className="text-xs font-bold text-slate-900">
+                      CAN-BUS Link
+                    </span>
+                    <span className="text-[9px] font-black bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase">
+                      Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button className="mt-auto btn btn-accent w-full py-4 text-xs">
+                <Download size={16} />
                 {t("demo.export")}
               </button>
             </div>
           </div>
 
-          <div className="px-8 py-4 bg-black/40 border-t border-white/5 flex justify-between items-center text-[10px] font-black uppercase text-white/30 tracking-widest">
-            <div className="flex gap-8">
-              <span>Session Time: 00:42:18</span>
-              <span>Data Packets: 1.28 GB</span>
-              <span>VIN Hash: 1HGCM...8293</span>
+          <div className="px-10 py-6 bg-slate-950 flex flex-wrap justify-between items-center gap-6">
+            <div className="flex gap-10 text-[9px] font-black uppercase text-white/40 tracking-[0.2em]">
+              <div className="flex flex-col gap-1">
+                <span className="text-white/20">Session</span>
+                <span>00:42:18</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-white/20">Packets</span>
+                <span>1.28 GB</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-accent-cyan">
-              <Cloud size={12} />
-              <span>Cloud Sync Active</span>
+            <div className="flex items-center gap-2 bg-blue-600/20 border border-blue-600/30 px-4 py-2 rounded-xl">
+              <Cloud size={14} className="text-blue-400 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-400">
+                Cloud Sync Active
+              </span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
