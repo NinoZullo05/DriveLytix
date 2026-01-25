@@ -29,6 +29,7 @@ yarn-error.log*
 # Mobile specific (handled in mobile/.gitignore normally, but good to have here)
 mobile/.expo/
 mobile/android/
+mobile/android_old/
 mobile/ios/
 mobile/node_modules/
 
@@ -39,3 +40,28 @@ web/dist/
 # Backend specific
 backend/node_modules/
 backend/dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets and local config
+.env*
+local.properties
+*.keystore
+*.jks
+
+# Antigravity / Agent
+.agent/
+*_plan.md
+
+# IDE specific
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
